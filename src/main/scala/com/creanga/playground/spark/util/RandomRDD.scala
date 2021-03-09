@@ -31,10 +31,13 @@ class RandomPartition[A: ClassTag](val index: Int,
     context: Map[String, String] = Map.empty[String, String],
     generatorFunction: (Map[String, String]) => Seq[A]) extends Partition {
 
+  if (context.contains("partitionIndex"))
+    throw new RuntimeException("partitionIndex is an reserved keyword")
+
   def values: Iterator[A] = {
     var list = new ArrayBuffer[A]()
     for (_ <- 0 until numValues) {
-      list ++= generatorFunction(context)
+      list ++= generatorFunction(context + ("partitionIndex" -> index.toString))
     }
     list.iterator
   }
