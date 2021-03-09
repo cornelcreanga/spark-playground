@@ -11,15 +11,14 @@ object StreamingTransactionExample {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf()
         .setMaster("local[2]")
-        .setAppName("CountingSheep")
+        .setAppName("StreamingTransactionExample")
         .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     val sc = new SparkContext(conf)
-
 
     //in real life we'll receive this data as a stream
     val originalRdd = new RandomRDD[Item](sc,
       sc.defaultParallelism,
-      sc.defaultParallelism * 200000,
+      sc.defaultParallelism * 200000, // will crash without enough memory (12-16gb)
       context = Map("transactionProbabilityPercent" -> "0.5",
         "maxItemsPerTransaction" -> "5",
         "transactionIncompletePercent" -> "0.01",
@@ -62,7 +61,7 @@ object StreamingTransactionExample {
 
   def generateRandomItem(context: Map[String, String]): Seq[Item] = {
     val isTransaction = (context("transactionProbabilityPercent").toDouble > Math.random())
-    val key = "key" + (context("keyNo").toInt * Math.random()).toInt
+    val key = "key" + (context("keyNo").toInt * Math.random()).toInt + 1
     val bodyLength = context("bodyLength").toInt
     if (isTransaction) {
       val transactionIncomplete = context("transactionIncompletePercent").toDouble > Math.random()

@@ -22,9 +22,10 @@ case class SimpleItem(var id: String, var key: String, var body: Array[Byte]) ex
 }
 
 case class TransactionalItem(var item: SimpleItem,
-    var transactionId: String,
-    var transactionIdItems: Int,
-    var transactionItemId: Int) extends Item with Serializable {
+    var transactionId: String, //unique transaction identifier
+    var transactionIdItems: Int, //no of items from a transaction
+    var transactionItemId: Int //item no (used for ordering items in a transaction)
+) extends Item with Serializable {
 
 
   private def writeObject(out: ObjectOutputStream): Unit = {
