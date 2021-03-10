@@ -3,11 +3,11 @@ package com.creanga.playground.spark.example.deduplication
 import java.util.UUID
 
 import com.creanga.playground.spark.util.RandomRDD
+import com.creanga.playground.spark.util.Utils.randomArray
 import org.apache.spark.sql._
-import org.apache.spark.sql.types._
-import org.apache.spark.storage.StorageLevel
 import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.{col, rank}
+import org.apache.spark.storage.StorageLevel
 
 
 object DeduplicationExample {
@@ -25,8 +25,8 @@ object DeduplicationExample {
 
     val rdd = new RandomRDD[Item](sc,
       sc.defaultParallelism,
-      sc.defaultParallelism * 1000000, // will crash without enough memory (12-16gb)
-      context = Map("duplicationProbabilityPercent" -> "0.1", "duplicationItems" -> "10"),
+      sc.defaultParallelism * 100000, // will crash without enough memory (12-16gb)
+      context = Map("duplicationProbabilityPercent" -> "0.1", "duplicationItems" -> "10", "bodyLength" -> "5000"),
       generatorFunction = generateRandomItem
     )
 
@@ -36,41 +36,66 @@ object DeduplicationExample {
     val df = sparkSession.createDataFrame(rdd)
     df.printSchema()
 
-//    about 2x faster than the second option
-//    val byBucket = Window.partitionBy("id").orderBy(col("timestamp").desc)
+
+    val byBucket = Window.partitionBy("id").orderBy(col("timestamp").desc)
+    t1 = System.currentTimeMillis()
+    val deduplicatedDF = df.withColumn("rank", rank.over(byBucket)).where("rank = 1").drop("rank")
+    deduplicatedDF.printSchema()
+    println(deduplicatedDF.count())
+    t2 = System.currentTimeMillis()
+    println(t2 - t1)
+
+    //fastest version
+//        val byBucket = Window.partitionBy("id")
+//        t1 = System.currentTimeMillis()
+//        val deduplicatedDF = df.withColumn("max", functions.max("timestamp").over(byBucket)).where(col("timestamp")===col("max")).drop("max")
+//        deduplicatedDF.printSchema()
+//        println(deduplicatedDF.count())
+//        t2 = System.currentTimeMillis()
+//        println(t2 - t1)
+
+
+    //    import sparkSession.implicits._
+//    val deduplicatedDF = df.as[Item]
+//        .groupByKey(_.id)
+//        .reduceGroups((x, y) => if (x.timestamp > y.timestamp) x else y)
+//        .map(_._2)
+//
 //    t1 = System.currentTimeMillis()
-//    val deduplicatedDF = df.withColumn("rank", rank.over(byBucket)).where("rank = 1")
+//    println(deduplicatedDF.count())
+//    t2 = System.currentTimeMillis()
+//    println(t2 - t1)
+
+//    import sparkSession.implicits._
+//    val reducedRdd = df.as[Item].rdd
+//        .groupBy(r => r.id)
+//        .map(item => {
+//          val list = item._2.toList
+//          (item._1, list.maxBy(_.timestamp(2)))
+//        }).map(_._2)
+//    val deduplicatedDF: DataFrame = sparkSession.createDataFrame(reducedRdd)
+//    t1 = System.currentTimeMillis()
 //    println(deduplicatedDF.count())
 //    t2 = System.currentTimeMillis()
 //    println(t2 - t1)
 
 
-    import sparkSession.implicits._
-    val deduplicatedDF = df.as[Item]
-        .groupByKey(_.id)
-        .reduceGroups((x, y) => if (x.timestamp > y.timestamp) x else y)
-        .map(_._2)
-
-    t1 = System.currentTimeMillis()
-    println(deduplicatedDF.count())
-    t2 = System.currentTimeMillis()
-    println(t2 - t1)
-
-    Thread.sleep(10*60*1000)
+    Thread.sleep(10 * 60 * 1000)
 
   }
 
 
   def generateRandomItem(context: Map[String, String]): Seq[Item] = {
-    val duplicate = (1-context("duplicationProbabilityPercent").toDouble) < Math.random()
+    val bodyLength = context("bodyLength").toInt
+    val duplicate = context("duplicationProbabilityPercent").toDouble > Math.random()
     if (duplicate) {
       val items = (context("duplicationItems").toInt * Math.random()).toInt + 1
       val id = UUID.randomUUID().toString
       (0 until items).view.map(counter => {
-        Item(id, UUID.randomUUID().toString)
+        Item(id, UUID.randomUUID().toString, randomArray(bodyLength))
       })
     } else {
-      Array(Item(UUID.randomUUID().toString, UUID.randomUUID().toString))
+      Array(Item(UUID.randomUUID().toString, UUID.randomUUID().toString, randomArray(bodyLength)))
     }
 
   }

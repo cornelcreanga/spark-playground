@@ -3,6 +3,7 @@ package com.creanga.playground.spark.example.transactions
 import java.util.UUID
 
 import com.creanga.playground.spark.util.RandomRDD
+import com.creanga.playground.spark.util.Utils.randomArray
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -82,11 +83,6 @@ object StreamingTransactionExample {
     }
   }
 
-  def randomArray(n: Int): Array[Byte] = {
-    //val body = new Array[Byte](bodyLength)
-    //Random.nextBytes(body) - todo - check the speed on random implementation before using it
-    Array.fill[Byte](n)(0)
-  }
 
 }
 
