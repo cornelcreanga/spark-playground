@@ -87,6 +87,7 @@ object Mapping {
     if (unassigned.size != activity.unassigned.size) {
       activity.unassigned = unassigned
     }
+    //we might want to expire the old sessions too todo
     currentState.update(previousState)
     gpsToReturn.iterator
   }
