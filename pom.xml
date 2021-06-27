@@ -25,6 +25,8 @@
         <maven-scala-plugin.version>2.15.2</maven-scala-plugin.version>
         <maven-compiler-plugin.version>2.5.1</maven-compiler-plugin.version>
         <javassist.version>3.28.0-GA</javassist.version>
+
+        <jackson.version>2.12.0</jackson.version>
     </properties>
 
     <dependencies>
@@ -66,6 +68,26 @@
             <version>${scala.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.module</groupId>
+            <artifactId>jackson-module-scala_2.12</artifactId>
+            <version>${jackson.version}</version>
+        </dependency>
 
     </dependencies>
 
