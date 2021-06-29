@@ -65,7 +65,10 @@ object Mapping {
       }
     })
 
+    //todo - this will not work in case of reprocessing - we need to store the init timestamp in the unassigned structure and
+    //use it for comparison instead of currentTime.
     val currentTimestamp = System.currentTimeMillis()
+
     gpsEvents ++= activity.unassigned
     gpsEvents.foreach(gpsEvent => {
       breakable {
