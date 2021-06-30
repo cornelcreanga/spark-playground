@@ -19,6 +19,5 @@ case class SessionInfo(creationTimestamp: Long, var startTimestamp: Long, var en
 
 case class Activity(sessionInfo: ArrayBuffer[SessionInfo], var unassigned: ArrayBuffer[GpsTick])
 
-case class SessionState(map: mutable.Map[String, Activity])
 
 

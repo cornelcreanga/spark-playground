@@ -11,8 +11,6 @@ import org.apache.spark.sql.streaming.GroupState
 
 object Mapping {
 
-  val watermark: Duration = Duration(1, MINUTES)
-
   /**
    * assumptions:
    * no missing tripStart/tripEnd events
@@ -20,17 +18,15 @@ object Mapping {
    */
   def filterNonSessionGpsEvents(driverId: String,
       rows: Iterator[Row],
-      currentState: GroupState[SessionState]): Iterator[GpsTick] = {
+      currentState: GroupState[Activity]): Iterator[GpsTick] = {
 
     val gpsToReturn = new ArrayBuffer[GpsTick](1024)
     val unassigned = new ArrayBuffer[GpsTick]()
 
-    val previousState: SessionState = if (currentState.exists) {
+    val previousState: Activity = if (currentState.exists) {
       currentState.get
     } else {
-      val map = new mutable.HashMap[String, Activity]()
-      map(driverId) = Activity(new ArrayBuffer[SessionInfo], ArrayBuffer.empty[GpsTick])
-      SessionState(map)
+      Activity(new ArrayBuffer[SessionInfo], ArrayBuffer.empty[GpsTick])
     }
 
     val tripEvents = new ArrayBuffer[TripEvent]
@@ -46,9 +42,13 @@ object Mapping {
     })
     val startEvents = tripEvents.filter(t => t.event == TripEventType.Start).sortBy(_.timestamp)
     val endEvents = tripEvents.filter(t => t.event == TripEventType.End).sortBy(_.timestamp)
+    val lastEndEventTimestamp = if (endEvents.nonEmpty) {
+      endEvents.last.timestamp
+    } else if (startEvents.nonEmpty){
+      startEvents.last.timestamp
+    } else 0L
 
-    val activity = previousState.map.getOrElse(driverId,
-      Activity(new ArrayBuffer[SessionInfo], ArrayBuffer.empty[GpsTick]))
+    val activity = previousState
     val sessions = activity.sessionInfo
 
     startEvents.foreach(e => {
@@ -65,11 +65,9 @@ object Mapping {
       }
     })
 
-    //todo - this will not work in case of reprocessing - we need to store the init timestamp in the unassigned structure and
-    //use it for comparison instead of currentTime.
-    val currentTimestamp = System.currentTimeMillis()
-
-    gpsEvents ++= activity.unassigned
+    if (activity.unassigned.nonEmpty) {
+      gpsEvents.insertAll(0, activity.unassigned)
+    }
     gpsEvents.foreach(gpsEvent => {
       breakable {
         var found = false
@@ -81,8 +79,8 @@ object Mapping {
             break
           }
         })
-        if ((!found) && (gpsEvent.timestamp > currentTimestamp - watermark.toMillis)) {
-          //println(s"unassigned $gpsEvent")
+        if ((!found) && (gpsEvent.timestamp > lastEndEventTimestamp)) {
+          println(s"unassigned $gpsEvent")
           unassigned += gpsEvent
         }
       }
