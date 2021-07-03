@@ -17,7 +17,7 @@ case class TickProducer(data: MemoryStream[String]) {
 
   def produce(second: Int): Unit = {
     Thread.sleep(Math.max((second - prev) * 1000, 0))
-    val gps = GpsTick("1", System.currentTimeMillis(), counter)
+    val gps = GpsTick("1", System.currentTimeMillis(), counter.toString)
     data.addData(plainMapper.writeValueAsString(gps))
     counter = counter + 1
     prev = second
@@ -27,7 +27,7 @@ case class TickProducer(data: MemoryStream[String]) {
 case class TripProducer(data: MemoryStream[String]) {
   private var prev = 0
 
-  def produce(second: Int, event: TripEventType, tripId: Long): Unit = {
+  def produce(second: Int, event: TripEventType, tripId: String): Unit = {
     Thread.sleep((second - prev) * 1000)
     val tripEvent = TripEvent("1", event, System.currentTimeMillis(), tripId)
 
@@ -71,16 +71,16 @@ object SessionProcessing {
       val tickData = TripProducer(data)
 
       for (i <- Range(1, 10)) tickGps.produce(i)
-      tickData.produce(10, TripEventType.Start, 1)
+      tickData.produce(10, TripEventType.Start, "1")
 
       for (i <- Range(10, 70)) tickGps.produce(i)
-      tickData.produce(70, TripEventType.End, 1)
+      tickData.produce(70, TripEventType.End, "1")
 
       for (i <- Range(70, 100)) tickGps.produce(i)
-      tickData.produce(100, TripEventType.Start, 2)
+      tickData.produce(100, TripEventType.Start, "2")
 
       for (i <- Range(100, 170)) tickGps.produce(i)
-      tickData.produce(170, TripEventType.End, 2)
+      tickData.produce(170, TripEventType.End, "2")
 
       for (i <- Range(170, 200)) tickGps.produce(i)
     }

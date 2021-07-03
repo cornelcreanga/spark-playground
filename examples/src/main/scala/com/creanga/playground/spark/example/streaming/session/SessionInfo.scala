@@ -10,9 +10,9 @@ object TripEventType extends Enumeration {
   val Start, End = Value
 }
 
-case class GpsTick(driverId: String, timestamp: Long, gpsId: Long)
+case class GpsTick(driverId: String, timestamp: Long, gpsId: String)
 
-case class TripEvent(driverId: String, event: TripEventType, timestamp: Long, tripEventId: Long)
+case class TripEvent(driverId: String, event: TripEventType, timestamp: Long, tripEventId: String)
 
 case class SessionInfo(creationTimestamp: Long, var startTimestamp: Long, var endTimestamp: Long,
     var gpsTicks: ArrayBuffer[GpsTick])
