@@ -11,9 +11,46 @@ import org.apache.spark.sql.streaming.GroupState
 
 object Mapping {
 
+
+  def buildSessions(tripId: String, rows: Iterator[Row],
+      currentState: GroupState[SessionInfo2]): SessionInfo2 = {
+
+    val previousState: SessionInfo2 = if (currentState.exists) {
+      currentState.get
+    } else {
+      SessionInfo2(tripId,"", 0L, 0L, ArrayBuffer.empty[GpsTripEvent])
+    }
+    val tripEvents = new ArrayBuffer[TripEvent]
+    val gpsEvents = new ArrayBuffer[GpsTripEvent]
+
+    rows.foreach(row => {
+      val json = row.getAs[String]("value")
+      if (json.contains("driverId")) {
+        tripEvents += plainMapper.readValue(json, classOf[TripEvent])
+      } else {
+        gpsEvents += plainMapper.readValue(json, classOf[GpsTripEvent])
+      }
+    })
+    val startEvent = tripEvents.find(t => t.event == "Start")
+    val endEvent = tripEvents.find(t => t.event == "End")
+    if (startEvent.isDefined){
+      previousState.startTimestamp = startEvent.get.timestamp
+      previousState.driverId = startEvent.get.driverId
+    }
+    if (endEvent.isDefined){
+      previousState.endTimestamp = endEvent.get.timestamp
+    }
+    gpsEvents.foreach(e=>{
+      previousState.gpsTripEvents += e
+    })
+    currentState.update(previousState)
+    previousState
+  }
+
   /**
    * assumptions:
    * no missing tripStart/tripEnd events
+   *
    * @return
    */
   def filterNonSessionGpsEvents(driverId: String,
@@ -40,11 +77,11 @@ object Mapping {
         gpsEvents += plainMapper.readValue(json, classOf[GpsTick])
       }
     })
-    val startEvents = tripEvents.filter(t => t.event == TripEventType.Start).sortBy(_.timestamp)
-    val endEvents = tripEvents.filter(t => t.event == TripEventType.End).sortBy(_.timestamp)
+    val startEvents = tripEvents.filter(t => t.event == "Start").sortBy(_.timestamp)
+    val endEvents = tripEvents.filter(t => t.event == "End").sortBy(_.timestamp)
     val lastEndEventTimestamp = if (endEvents.nonEmpty) {
       endEvents.last.timestamp
-    } else if (startEvents.nonEmpty){
+    } else if (startEvents.nonEmpty) {
       startEvents.last.timestamp
     } else 0L
 

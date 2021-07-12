@@ -1,0 +1,46 @@
+version: "3"
+
+services:
+
+  zookeeper:
+    image: 'bitnami/zookeeper:latest'
+    hostname: zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+  kafka:
+    hostname: kafka
+    image: 'bitnami/kafka:latest'
+    ports:
+      - '9093:9093'
+    depends_on:
+      - zookeeper
+    environment:
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - ALLOW_PLAINTEXT_LISTENER=yes
+      - KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP=CLIENT:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CFG_LISTENERS=CLIENT://:9092,EXTERNAL://:9093
+      - KAFKA_CFG_ADVERTISED_LISTENERS=CLIENT://kafka:9092,EXTERNAL://localhost:9093
+      - KAFKA_INTER_BROKER_LISTENER_NAME=CLIENT
+
+  streaming:
+    container_name: streaming
+    image: streaming:latest
+    build: ../../examples
+    environment:
+      - ENV=local
+      - INSTANCE_ID=1
+      - LOCAL_STORAGE=/localfiles
+      - KAFKA_BROKERS=kafka:9093
+    ports:
+      - "4040:4040"
+    expose:
+      - "4040"
+    volumes:
+      - /var/local/docker/msengg/volumes/localfiles/:/localfiles:z
+
+    depends_on:
+      - kafka
+
+
