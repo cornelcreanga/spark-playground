@@ -5,6 +5,7 @@ import scala.concurrent.Future
 
 import com.creanga.playground.spark.util.Mapper.plainMapper
 import org.apache.spark.sql.execution.streaming.MemoryStream
+import org.apache.spark.sql.expressions.UserDefinedFunction
 import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.streaming.{GroupStateTimeout, OutputMode, Trigger}
 import org.apache.spark.sql.{Dataset, SQLContext, SaveMode, SparkSession}
@@ -51,7 +52,7 @@ object SessionProcessing {
   }
 
 
-  private val extractDriverIdUDF = udf(extractDriverId _)
+  private val extractDriverIdUDF: UserDefinedFunction = udf(extractDriverId _)
 
   def main(args: Array[String]): Unit = {
 
