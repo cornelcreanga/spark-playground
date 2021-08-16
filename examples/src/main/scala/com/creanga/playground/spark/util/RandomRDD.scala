@@ -35,7 +35,7 @@ class RandomPartition[A: ClassTag](val index: Int,
     throw new RuntimeException("partitionIndex is an reserved keyword")
 
   def values: Iterator[A] = {
-    var list = new ArrayBuffer[A]()
+    val list = new ArrayBuffer[A]()
     for (_ <- 0 until numValues) {
       list ++= generatorFunction(context + ("partitionIndex" -> index.toString))
     }
