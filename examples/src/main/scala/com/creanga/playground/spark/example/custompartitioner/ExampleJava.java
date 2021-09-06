@@ -75,11 +75,16 @@ public class ExampleJava {
         metadata.add(new LocationMetadata(new Location("1", "180", 2500), new String[]{"a", "b"}));
 
 
+
+
         RDD<String> rdd = sc.parallelize(paths).rdd();
 
 
-        CidPartitioner cidPartitioner = new CidPartitioner(sc.defaultParallelism(), 1300);
+
         JavaRDD<LocationMetadata> metadataRdd = sc.parallelize(metadata);
+
+
+
         long totalSize = metadataRdd.
                 map((Function<LocationMetadata, Long>) v1 -> v1.getLocation().getFilesTotalSize()).
                 reduce((Function2<Long, Long, Long>) (a, b) -> Long.sum(a, b));

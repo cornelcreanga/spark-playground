@@ -5,12 +5,12 @@ import java.io.Serializable;
 public class Location  implements Serializable {
 
     String batchId;
-    String cid;
+    String id;
     long filesTotalSize;
 
-    public Location(String batchId, String cid, long filesTotalSize) {
+    public Location(String batchId, String id, long filesTotalSize) {
         this.batchId = batchId;
-        this.cid = cid;
+        this.id = id;
         this.filesTotalSize = filesTotalSize;
     }
 
@@ -18,8 +18,8 @@ public class Location  implements Serializable {
         return batchId;
     }
 
-    public String getCid() {
-        return cid;
+    public String getId() {
+        return id;
     }
 
     public long getFilesTotalSize() {
@@ -30,7 +30,7 @@ public class Location  implements Serializable {
     public String toString() {
         return "Location{" +
                 "batchId='" + batchId + '\'' +
-                ", cid='" + cid + '\'' +
+                ", cid='" + id + '\'' +
                 ", filesTotalSize=" + filesTotalSize +
                 '}';
     }
