@@ -29,6 +29,7 @@
         <javassist.version>3.28.0-GA</javassist.version>
 
         <jackson.version>2.12.0</jackson.version>
+        <mockneat.version>0.4.7</mockneat.version>
     </properties>
 
     <modules>
@@ -37,6 +38,12 @@
 
     <dependencyManagement>
     <dependencies>
+
+        <dependency>
+            <groupId>net.andreinc</groupId>
+            <artifactId>mockneat</artifactId>
+            <version>${mockneat.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.apache.kafka</groupId>

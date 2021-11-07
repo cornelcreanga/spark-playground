@@ -1,13 +1,13 @@
 package com.creanga.playground.spark.example.deduplication
 
-import java.util.UUID
-
 import com.creanga.playground.spark.util.RandomRDD
 import com.creanga.playground.spark.util.Utils.randomArray
 import org.apache.spark.sql._
 import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{col, rank}
 import org.apache.spark.storage.StorageLevel
+
+import java.util.UUID
 
 
 object DeduplicationExample {
@@ -16,8 +16,8 @@ object DeduplicationExample {
   def main(args: Array[String]): Unit = {
 
     val sparkSession = SparkSession.builder()
-        .appName("Streaming events").master("local[2]")
-        .getOrCreate()
+      .appName("Streaming events").master("local[2]")
+      .getOrCreate()
     val sc = sparkSession.sparkContext
 
     var t1 = 0L
@@ -25,7 +25,7 @@ object DeduplicationExample {
 
     val rdd = new RandomRDD[Item](sc,
       sc.defaultParallelism,
-      sc.defaultParallelism * 100000, // will crash without enough memory (12-16gb)
+      sc.defaultParallelism * 100000, // will crash without enough memory
       context = Map("duplicationProbabilityPercent" -> "0.1", "duplicationItems" -> "10", "bodyLength" -> "5000"),
       generatorFunction = generateRandomItem
     )
@@ -37,50 +37,53 @@ object DeduplicationExample {
     df.printSchema()
 
 
-    val byBucket = Window.partitionBy("id").orderBy(col("timestamp").desc)
+    println("-------------------------------------------------------------------------------")
+    var byBucket = Window.partitionBy("id").orderBy(col("timestamp").desc)
     t1 = System.currentTimeMillis()
-    val deduplicatedDF = df.withColumn("rank", rank.over(byBucket)).where("rank = 1").drop("rank")
-    deduplicatedDF.printSchema()
+    var deduplicatedDF = df.withColumn("rank", rank.over(byBucket)).where("rank = 1").drop("rank")
+    println(deduplicatedDF.count())
+    t2 = System.currentTimeMillis()
+    println(t2 - t1)
+    println("-------------------------------------------------------------------------------")
+
+    //fastest version
+    byBucket = Window.partitionBy("id")
+    t1 = System.currentTimeMillis()
+    deduplicatedDF = df.withColumn("max", functions.max("timestamp").over(byBucket)).where(col("timestamp") === col("max")).drop("max")
+    println(deduplicatedDF.count())
+    t2 = System.currentTimeMillis()
+    println(t2 - t1)
+    println("-------------------------------------------------------------------------------")
+
+    import sparkSession.implicits._
+    val deduplicatedDataset = df.as[Item]
+      .groupByKey(_.id)
+      .reduceGroups((x, y) => if (x.timestamp > y.timestamp) x else y)
+      .map(_._2)
+
+    t1 = System.currentTimeMillis()
+    println(deduplicatedDataset.count())
+    t2 = System.currentTimeMillis()
+    println(t2 - t1)
+    println("-------------------------------------------------------------------------------")
+
+    import sparkSession.implicits._
+    val reducedRdd = df.as[Item].rdd
+      .groupBy(r => r.id)
+      .map(item => {
+        val list = item._2.toList
+        (item._1, list.maxBy(_.timestamp(2)))
+      }).map(_._2)
+    deduplicatedDF = sparkSession.createDataFrame(reducedRdd)
+    t1 = System.currentTimeMillis()
     println(deduplicatedDF.count())
     t2 = System.currentTimeMillis()
     println(t2 - t1)
 
-    //fastest version
-//        val byBucket = Window.partitionBy("id")
-//        t1 = System.currentTimeMillis()
-//        val deduplicatedDF = df.withColumn("max", functions.max("timestamp").over(byBucket)).where(col("timestamp")===col("max")).drop("max")
-//        deduplicatedDF.printSchema()
-//        println(deduplicatedDF.count())
-//        t2 = System.currentTimeMillis()
-//        println(t2 - t1)
+    println("-------------------------------------------------------------------------------")
 
-
-    //    import sparkSession.implicits._
-//    val deduplicatedDF = df.as[Item]
-//        .groupByKey(_.id)
-//        .reduceGroups((x, y) => if (x.timestamp > y.timestamp) x else y)
-//        .map(_._2)
-//
-//    t1 = System.currentTimeMillis()
-//    println(deduplicatedDF.count())
-//    t2 = System.currentTimeMillis()
-//    println(t2 - t1)
-
-//    import sparkSession.implicits._
-//    val reducedRdd = df.as[Item].rdd
-//        .groupBy(r => r.id)
-//        .map(item => {
-//          val list = item._2.toList
-//          (item._1, list.maxBy(_.timestamp(2)))
-//        }).map(_._2)
-//    val deduplicatedDF: DataFrame = sparkSession.createDataFrame(reducedRdd)
-//    t1 = System.currentTimeMillis()
-//    println(deduplicatedDF.count())
-//    t2 = System.currentTimeMillis()
-//    println(t2 - t1)
-
-
-    Thread.sleep(10 * 60 * 1000)
+    sc.stop()
+    //Thread.sleep(10 * 60 * 1000)
 
   }
 

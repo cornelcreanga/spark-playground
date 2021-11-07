@@ -92,37 +92,29 @@ public class ExampleJava {
 
         System.out.println(totalSize + "-" + partitionSize);
 
-        JavaRDD<List<LocationMetadata>> metadataRddList = metadataRdd.glom().flatMap(new FlatMapFunction<List<LocationMetadata>, List<LocationMetadata>>() {
-            @Override
-            public Iterator<List<LocationMetadata>> call(List<LocationMetadata> locationMetadata) throws Exception {
-                ArrayList<List<LocationMetadata>> list = new ArrayList<>();
-                List<LocationMetadata> sublist = new ArrayList<>();
-                long size = 0;
-                for (int i = 0; i < locationMetadata.size(); i++) {
-                    LocationMetadata item = locationMetadata.get(i);
-                    size += item.getLocation().getFilesTotalSize();
-                    if (size < partitionSize) {
-                        sublist.add(item);
-                    } else {
-                        list.add(new ArrayList<>(sublist));
-                        size = 0;
-                        sublist = new ArrayList<>();
-                        sublist.add(item);
-                    }
-                }
-                if (sublist.size() > 0)
+        JavaRDD<List<LocationMetadata>> metadataRddList = metadataRdd.glom().flatMap(locationMetadata -> {
+            ArrayList<List<LocationMetadata>> list = new ArrayList<>();
+            List<LocationMetadata> sublist = new ArrayList<>();
+            long size = 0;
+            for (int i = 0; i < locationMetadata.size(); i++) {
+                LocationMetadata item = locationMetadata.get(i);
+                size += item.getLocation().getFilesTotalSize();
+                if (size < partitionSize) {
+                    sublist.add(item);
+                } else {
                     list.add(new ArrayList<>(sublist));
-                return list.iterator();
+                    size = 0;
+                    sublist = new ArrayList<>();
+                    sublist.add(item);
+                }
             }
+            if (sublist.size() > 0)
+                list.add(new ArrayList<>(sublist));
+            return list.iterator();
         });
 
         List<List<LocationMetadata>> collected= metadataRddList.collect();
-        collected.forEach(new Consumer<List<LocationMetadata>>() {
-            @Override
-            public void accept(List<LocationMetadata> locationMetadata) {
-                System.out.println(locationMetadata);
-            }
-        });
+        collected.forEach(System.out::println);
         System.out.println(metadataRddList.count());
 
         metadataRddList.foreachPartition((VoidFunction<Iterator<List<LocationMetadata>>>) listIterator ->
@@ -177,14 +169,5 @@ public class ExampleJava {
         System.out.println(pairdRdd.partitions().size());
 
 
-//        Object o = rdd.context().runJob(rdd,
-//                new AbstractSerializableFunction2<TaskContext, scala.collection.Iterator<String>, Integer>() {
-//                    @Override
-//                    public Integer apply(TaskContext context, scala.collection.Iterator<String> rows) {
-//                        return 1;
-//                    }
-//                }, uClassTag
-//        );
-        //sparkSession.sparkContext().runJob(rdd, new JobFunc<String, Boolean>(), ClassTag$.MODULE$.apply(Boolean.class));
     }
 }
