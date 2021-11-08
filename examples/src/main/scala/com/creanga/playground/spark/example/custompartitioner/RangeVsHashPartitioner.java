@@ -137,10 +137,4 @@ public class RangeVsHashPartitioner {
         });
     }
 
-
-//    def toCSVLine(data):
-//            return ','.join(str(d) for d in data)
-//
-//    lines = labelsAndPredictions.map(toCSVLine)
-//            lines.saveAsTextFile('hdfs://my-node:9000/tmp/labels-and-predictions.csv')
 }
