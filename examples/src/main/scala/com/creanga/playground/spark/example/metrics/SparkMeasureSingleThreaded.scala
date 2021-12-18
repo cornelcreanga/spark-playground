@@ -30,7 +30,7 @@ object SparkMeasureSingleThreaded {
 
     val df1 = spark.createDataFrame(sc.parallelize(structureData1), structureSchema1)
 
-
+    //spark.newSession()
     val stageMetrics = ch.cern.sparkmeasure.StageMetrics(spark)
     stageMetrics.begin()
     df1.write.
