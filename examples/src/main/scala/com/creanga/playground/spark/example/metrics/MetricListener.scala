@@ -1,13 +1,19 @@
 package com.creanga.playground.spark.example.metrics
 
 import java.util.concurrent.atomic.AtomicLong
-
 import scala.collection.mutable
-
 import com.creanga.playground.spark.example.metrics.MetricListener.JOB_CONTEXT_NAME
-import org.apache.spark.scheduler.{SparkListener, SparkListenerStageSubmitted, SparkListenerTaskEnd}
+import org.apache.spark.metrics.{ExecutorMetricType, JVMHeapMemory}
+import org.apache.spark.scheduler.{SparkListener, SparkListenerExecutorMetricsUpdate, SparkListenerJobEnd, SparkListenerStageSubmitted, SparkListenerTaskEnd}
+import org.json4s.JsonAST.JField
 
 class MetricListener(jobContextValue: String) extends SparkListener {
+
+  override def onExecutorMetricsUpdate(executorMetricsUpdate: SparkListenerExecutorMetricsUpdate): Unit = {
+    println("onExecutorMetricsUpdate")
+  }
+
+  override def onJobEnd(jobEnd: SparkListenerJobEnd): Unit = super.onJobEnd(jobEnd)
 
   var rowsRead: AtomicLong = new AtomicLong
   var bytesRead: AtomicLong = new AtomicLong
@@ -22,6 +28,11 @@ class MetricListener(jobContextValue: String) extends SparkListener {
   }
 
   override def onTaskEnd(taskEnd: SparkListenerTaskEnd): Unit = {
+
+
+//
+//    val execMetrics = taskEnd.taskExecutorMetrics
+//    val l = execMetrics.getMetricValue("JVMHeapMemory");
     if (stageIds.contains(taskEnd.stageId)) {
       if (taskEnd.taskMetrics != null) {//taskMetrics is null for a failed task
         rowsRead.addAndGet(taskEnd.taskMetrics.inputMetrics.recordsRead)
