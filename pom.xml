@@ -13,7 +13,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
-        <spark.version>3.1.2</spark.version>
+        <spark.version>3.2.1</spark.version>
 <!--        <spark.version>2.4.5</spark.version>-->
         <scala.version>2.12.14</scala.version>
         <scala.compat.version>2.12</scala.compat.version>
@@ -22,10 +22,9 @@
         <scala-maven-plugin.version>4.3.1</scala-maven-plugin.version>
         <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
         <maven-shade-plugin.version>3.2.2</maven-shade-plugin.version>
-        <maven-surefire-plugin.version>2.22.2</maven-surefire-plugin.version>
-        <maven-assembly-plugin.version>2.4.1</maven-assembly-plugin.version>
+        <maven-assembly-plugin.version>3.3.0</maven-assembly-plugin.version>
         <maven-scala-plugin.version>2.15.2</maven-scala-plugin.version>
-        <maven-compiler-plugin.version>2.5.1</maven-compiler-plugin.version>
+        <maven-compiler-plugin.version>3.9.0</maven-compiler-plugin.version>
         <javassist.version>3.28.0-GA</javassist.version>
 
         <jackson.version>2.12.0</jackson.version>
