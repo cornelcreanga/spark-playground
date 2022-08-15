@@ -10,6 +10,7 @@ import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.broadcast.Broadcast;
@@ -26,22 +27,14 @@ import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.creanga.playground.spark.util.IOUtils.getResourceFileAsStream;
 import static java.util.function.Function.identity;
 import static java.util.stream.Collectors.counting;
 import static java.util.stream.Collectors.groupingBy;
 
 public class CustomPartitionerDemo {
 
-    static List<String> getResourceFileAsStream(String fileName) throws IOException {
-        ClassLoader classLoader = ClassLoader.getSystemClassLoader();
-        try (InputStream is = classLoader.getResourceAsStream(fileName)) {
-            if (is == null) return null;
-            try (InputStreamReader isr = new InputStreamReader(is);
-                 BufferedReader reader = new BufferedReader(isr)) {
-                return reader.lines().collect(Collectors.toList());
-            }
-        }
-    }
+    String path = "/tmp/data";
 
     public static List<Tuple2<String, Long>> generateList() throws IOException {
         List<String> lines = getResourceFileAsStream("stats.csv");
@@ -56,13 +49,13 @@ public class CustomPartitionerDemo {
 
     public static void main(String[] args) throws IOException {
         SparkSession sparkSession = SparkSession.builder()
-                .master("local[4]")
+                .master("local[8]")
                 .appName("Spark streaming")
                 .getOrCreate();
         SparkContext sc = sparkSession.sparkContext();
         JavaSparkContext jsc = JavaSparkContext.fromSparkContext(sc);
-        int partitions = 10;
-        int values = 1000000;
+        int partitions = 16;
+        int values = 10000000;
 
         long t1= System.currentTimeMillis();
         List<Tuple3<String, Integer, Integer>> stats = new ArrayList<>();
@@ -163,12 +156,21 @@ public class CustomPartitionerDemo {
         // System.out.println(distribution);
         Broadcast<Map<String, Object>> distributionBroadcast = jsc.broadcast(distributionMap);
 
-        t1 = System.currentTimeMillis();
+//        t1 = System.currentTimeMillis();
         JavaPairRDD<String, byte[]> repartitionedRDD = pairRDD.repartitionAndSortWithinPartitions(new CustomPartitioner(distributionBroadcast, partitions));
-        System.out.println(repartitionedRDD.count());
-        t2 = System.currentTimeMillis();
-        System.out.println(t2-t1);
-        System.in.read();
+        //System.out.println(repartitionedRDD.count());
+//        t2 = System.currentTimeMillis();
+//        System.out.println(t2-t1);
+
+        repartitionedRDD.mapPartitions(new FlatMapFunction<Iterator<Tuple2<String,byte[]>>, Object>() {
+            @Override
+            public Iterator<Object> call(Iterator<Tuple2<String, byte[]>> tuple2Iterator) throws Exception {
+                return null;
+            }
+        });
+
+
+
 
 
     }
