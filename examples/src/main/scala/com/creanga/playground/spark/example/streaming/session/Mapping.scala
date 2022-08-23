@@ -1,24 +1,22 @@
 package com.creanga.playground.spark.example.streaming.session
 
-import scala.collection.mutable
-import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.duration.{Duration, MINUTES}
-import scala.util.control.Breaks._
-
 import com.creanga.playground.spark.util.Mapper.plainMapper
 import org.apache.spark.sql.Row
 import org.apache.spark.sql.streaming.GroupState
+
+import scala.collection.mutable.ArrayBuffer
+import scala.util.control.Breaks._
 
 object Mapping {
 
 
   def buildSessions(tripId: String, rows: Iterator[Row],
-      currentState: GroupState[SessionInfo2]): SessionInfo2 = {
+                    currentState: GroupState[SessionInfo2]): SessionInfo2 = {
 
     val previousState: SessionInfo2 = if (currentState.exists) {
       currentState.get
     } else {
-      SessionInfo2(tripId,"", 0L, 0L, ArrayBuffer.empty[GpsTripEvent])
+      SessionInfo2(tripId, "", 0L, 0L, ArrayBuffer.empty[GpsTripEvent])
     }
     val tripEvents = new ArrayBuffer[TripEvent]
     val gpsEvents = new ArrayBuffer[GpsTripEvent]
@@ -33,14 +31,14 @@ object Mapping {
     })
     val startEvent = tripEvents.find(t => t.event == "Start")
     val endEvent = tripEvents.find(t => t.event == "End")
-    if (startEvent.isDefined){
+    if (startEvent.isDefined) {
       previousState.startTimestamp = startEvent.get.timestamp
       previousState.driverId = startEvent.get.driverId
     }
-    if (endEvent.isDefined){
+    if (endEvent.isDefined) {
       previousState.endTimestamp = endEvent.get.timestamp
     }
-    gpsEvents.foreach(e=>{
+    gpsEvents.foreach(e => {
       previousState.gpsTripEvents += e
     })
     currentState.update(previousState)
@@ -54,8 +52,8 @@ object Mapping {
    * @return
    */
   def filterNonSessionGpsEvents(driverId: String,
-      rows: Iterator[Row],
-      currentState: GroupState[Activity]): Iterator[GpsTick] = {
+                                rows: Iterator[Row],
+                                currentState: GroupState[Activity]): Iterator[GpsTick] = {
 
     val gpsToReturn = new ArrayBuffer[GpsTick](1024)
     val unassigned = new ArrayBuffer[GpsTick]()

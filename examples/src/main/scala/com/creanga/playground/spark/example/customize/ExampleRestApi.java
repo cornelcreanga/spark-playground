@@ -15,7 +15,7 @@ public class ExampleRestApi {
                 .config("spark.master.rest.enabled", "true")
                 .getOrCreate();
 
-        DatabatcherHttpServer databatcherHttpServer = new DatabatcherHttpServer(4001);
+        DatabatcherHttpServer databatcherHttpServer = new DatabatcherHttpServer(4041);
         databatcherHttpServer.start();
         Thread.sleep(600000);
 
