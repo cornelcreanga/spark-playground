@@ -13,14 +13,10 @@ import scala.Tuple2;
 import scala.Tuple3;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 public class SyntheticRddProvider implements Serializable {
-
 
     private final transient JavaSparkContext jsc;
     private final int partitions;
@@ -28,6 +24,11 @@ public class SyntheticRddProvider implements Serializable {
     private final Map<String, Object> context;
     private final Broadcast<EnumeratedDistribution<String>> distributionBroadcast;
     private final Broadcast<Map<String, Integer>> cidToEventSizeBroadcast;
+
+    private static byte[] empty = new byte[10];
+    static{
+        Arrays.fill(empty,(byte)1);
+    }
 
     public SyntheticRddProvider(JavaSparkContext jsc, List<Tuple3<String, Integer, Integer>> stats, int partitions, int values, Map<String, Object> context) {
         this.jsc = jsc;
@@ -48,10 +49,10 @@ public class SyntheticRddProvider implements Serializable {
     }
 
 
-    public JavaRDD<Tuple2<String, byte[]>> buildKafkaRdd() {
+    public JavaRDD<Tuple2<String, byte[]>> buildRdd() {
 
         RecordGenerator<Tuple2<String, byte[]>> recordGenerator = (context, itemNumber) -> {
-            //we dont care about item offset/partition for the moment
+            //we dont care about item offset/getPartition for the moment
             FastRandom fastRandom = new FastRandom();
 
             EnumeratedDistribution<String> distribution = distributionBroadcast.getValue();
@@ -60,7 +61,10 @@ public class SyntheticRddProvider implements Serializable {
             for (int i = 0; i < itemNumber; i++) {
                 String cid = distribution.sample();
                 byte[] event = new byte[cidToEventSize.get(cid)];
-                fastRandom.nextBytes(event);
+                for (int j = 0; j < event.length; j++) {
+                    event[j] = (byte)(65+fastRandom.nextInt(26));
+                }
+//                fastRandom.nextBytes(event);
                 list.add(new Tuple2<>(cid, event));
             }
             return list;

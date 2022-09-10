@@ -1,14 +1,9 @@
 package com.creanga.playground.spark.example.rest;
 
-import com.sun.net.httpserver.HttpContext;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.net.URI;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
@@ -21,14 +16,18 @@ public class DatabatcherHttpServer {
         this.port = port;
     }
 
-    public void start() throws IOException {
+    public void start() throws RuntimeException {
         ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) Executors.newFixedThreadPool(4);
 
-        server = HttpServer.create(new InetSocketAddress(port), 0);
-        server.setExecutor(threadPoolExecutor);
-        server.createContext("/customapi/loggers", new LoggersHeaderHandler());
-        server.createContext("/customapi/classlocation", new ClassLocationHandler());
-        server.start();
+        try {
+            server = HttpServer.create(new InetSocketAddress(port), 0);
+            server.setExecutor(threadPoolExecutor);
+            server.createContext("/customapi/loggers", new LoggersHandler());
+            server.createContext("/customapi/classlocation", new ClassLocationHandler());
+            server.start();
+        }catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public void stop(){

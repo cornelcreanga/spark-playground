@@ -61,7 +61,7 @@ object StreamingTransactionExample {
   }
 
   def generateRandomItem(context: Map[String, String]): Seq[Item] = {
-    val isTransaction = (context("transactionProbabilityPercent").toDouble > Math.random())
+    val isTransaction = context("transactionProbabilityPercent").toDouble > Math.random()
     val key = "key" + (context("keyNo").toInt * Math.random()).toInt + 1
     val bodyLength = context("bodyLength").toInt
     if (isTransaction) {
