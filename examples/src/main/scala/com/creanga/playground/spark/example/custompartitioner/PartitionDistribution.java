@@ -9,47 +9,24 @@ import java.util.List;
 
 public class PartitionDistribution implements Serializable {
 
-    private static FastRandom random = new FastRandom();
+    private static final FastRandom random = new FastRandom();
 
-    private Integer firstPartition;
-    private Integer secondPartition;
-    private Double firstProbability;
-    private Double secondProbability;
+    private Integer singlePartition;
     private EnumeratedDistribution<Integer> enumeratedDistribution;
 
-    public PartitionDistribution(Integer firstPartition) {
-        this.firstPartition = firstPartition;
-    }
-
-    public PartitionDistribution(Integer firstPartition, Integer secondPartition, Double firstProbability, Double secondProbability) {
-        this.firstPartition = firstPartition;
-        this.secondPartition = secondPartition;
-        this.firstProbability = firstProbability;
-        this.secondProbability = secondProbability;
+    public PartitionDistribution(Integer singlePartition) {
+        this.singlePartition = singlePartition;
     }
 
     public PartitionDistribution(List<Pair<Integer, Double>> probabilities) {
         this.enumeratedDistribution = new EnumeratedDistribution<>(random, probabilities);
     }
 
-    public int getPartition(){
-        if (firstPartition !=null){
-            if (secondPartition == null){
-                return firstPartition;
-            }else{
-                return probabilities(firstProbability, secondProbability, firstPartition, secondPartition);
-            }
-        }else{
-            return enumeratedDistribution.sample();
-        }
-    }
-
-    private int probabilities(double firstProbability, double secondProbability, int firstPartition, int secondPartition) {
-        double r = random.nextDouble() / 1;
-        if (firstProbability > secondProbability) {
-            return (r > secondProbability / firstProbability) ? firstPartition : secondPartition;
+    public int getPartition() {
+        if (singlePartition != null) {
+            return singlePartition;
         } else {
-            return (r > firstProbability / secondProbability) ? secondPartition : firstPartition;
+            return enumeratedDistribution.sample();
         }
     }
 
