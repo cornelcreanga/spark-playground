@@ -21,6 +21,8 @@ public class LoggingTest {
         LOG.error("error");
         LOG.warn("warn");
         LOG.info("info");
+        LOG.debug("debug");
+        LOG.trace("trace");
         try {
             throw new RuntimeException("RuntimeException");
         } catch (Exception e) {
