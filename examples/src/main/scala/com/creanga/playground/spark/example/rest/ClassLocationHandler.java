@@ -29,4 +29,11 @@ public class ClassLocationHandler extends DefaultHttpHandler {
         response(httpExchange, 200, url.toExternalForm());
 
     }
+
+    protected void handleOptionsRequest(HttpExchange httpExchange) throws IOException {
+        httpExchange.getRequestHeaders().add("Allow", "GET,POST,OPTIONS");
+        httpExchange.getRequestHeaders().add("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+        httpExchange.getRequestHeaders().add("Access-Control-Allow-Headers", "Content-Type");
+        response(httpExchange, 200, "ok");
+    }
 }

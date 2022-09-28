@@ -7,8 +7,8 @@ object DeduplicationConditionalExample {
 
   def main(args: Array[String]): Unit = {
     val sparkSession = SparkSession.builder()
-        .appName("Streaming events").master("local[2]")
-        .getOrCreate()
+      .appName("Streaming events").master("local[2]")
+      .getOrCreate()
     val sc = sparkSession.sparkContext
     val structureData = Seq(
       Row("James1", "Smith1", "uid1", "1", 123),
@@ -19,11 +19,11 @@ object DeduplicationConditionalExample {
       Row("James4", "Smith4", "uid1", "2", 128)
     )
     val structureSchema = new StructType()
-        .add("firstname", StringType)
-        .add("middlename", StringType)
-        .add("idName", StringType)
-        .add("idValue", StringType)
-        .add("time", IntegerType)
+      .add("firstname", StringType)
+      .add("middlename", StringType)
+      .add("idName", StringType)
+      .add("idValue", StringType)
+      .add("time", IntegerType)
 
     /**
      * rowid uid time code

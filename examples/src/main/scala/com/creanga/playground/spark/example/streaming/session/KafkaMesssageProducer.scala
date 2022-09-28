@@ -1,15 +1,14 @@
 package com.creanga.playground.spark.example.streaming.session
 
-import java.util.UUID
-import java.util.concurrent.Executors
-
-import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
-import scala.concurrent.duration.Duration
-import scala.util.control.NonFatal
-
 import com.creanga.playground.spark.util.KafkaMessageProducer
 import com.creanga.playground.spark.util.Mapper.plainMapper
-import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+
+import java.util.UUID
+import java.util.concurrent.Executors
+import scala.concurrent.duration.Duration
+import scala.concurrent.{ExecutionContext, ExecutionContextExecutorService, Future}
+import scala.util.control.NonFatal
 
 object KafkaMesssageProducer {
 
@@ -18,23 +17,23 @@ object KafkaMesssageProducer {
     ExecutionContext.fromExecutorService(Executors.newFixedThreadPool(128))
 
   case class TripGenerator(driverId: String, durationInMins: Int, gpsEventInterval: Int,
-      producer: KafkaProducer[Array[Byte], Array[Byte]]) {
+                           producer: KafkaProducer[Array[Byte], Array[Byte]]) {
 
     def createTrip(): Unit = {
       val tripId = UUID.randomUUID().toString
       var tripEvent = TripEvent(driverId, "Start", System.currentTimeMillis(), tripId)
       producer.send(new ProducerRecord("tripEvents", plainMapper.writeValueAsBytes(tripEvent)))
-//      producer.send(new ProducerRecord("tripEvents", plainMapper.writeValueAsBytes(tripEvent)),
-//        new Callback() {
-//          override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
-//            if (e != null) {
-//              e.printStackTrace()
-//            }
-//            else {
-//              println("done")
-//            }
-//          }
-//        })
+      //      producer.send(new ProducerRecord("tripEvents", plainMapper.writeValueAsBytes(tripEvent)),
+      //        new Callback() {
+      //          override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
+      //            if (e != null) {
+      //              e.printStackTrace()
+      //            }
+      //            else {
+      //              println("done")
+      //            }
+      //          }
+      //        })
 
       producer.flush()
 
@@ -62,7 +61,7 @@ object KafkaMesssageProducer {
         try {
           val tripGenerator = TripGenerator(i.toString, duration, 1, KafkaMessageProducer.kafkaProducer)
           tripGenerator.createTrip()
-        }catch {
+        } catch {
           case NonFatal(e) => e.printStackTrace() //todo
         }
       }

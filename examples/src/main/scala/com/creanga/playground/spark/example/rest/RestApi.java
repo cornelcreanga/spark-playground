@@ -14,7 +14,7 @@ public class RestApi {
     @GET
     @Path("loggers/{logger}")
     @Produces({MediaType.APPLICATION_JSON})
-    public String getApplicationList(@PathParam("logger") String logger){
+    public String getApplicationList(@PathParam("logger") String logger) {
         return LogManager.getLogger(logger).getLevel().toString();
     }
 

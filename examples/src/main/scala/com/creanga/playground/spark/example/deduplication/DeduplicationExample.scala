@@ -66,8 +66,6 @@ object DeduplicationExample {
     t2 = System.currentTimeMillis()
     println(t2 - t1)
     println("-------------------------------------------------------------------------------")
-
-    import sparkSession.implicits._
     val reducedRdd = df.as[Item].rdd
       .groupBy(r => r.id)
       .map(item => {

@@ -8,9 +8,9 @@ import org.apache.spark.{SparkConf, SparkContext}
 object FlattenedUnionExample {
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf()
-        .setMaster("local[2]")
-        .setAppName("StreamingTransactionExample")
-        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+      .setMaster("local[2]")
+      .setAppName("StreamingTransactionExample")
+      .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     val sc = new SparkContext(conf)
     val spark = SparkSession.builder().getOrCreate()
 
@@ -31,24 +31,24 @@ object FlattenedUnionExample {
 
 
     val structureSchema1 = new StructType()
-        .add("name", new StructType()
-            .add("firstname", StringType)
-            .add("middlename", StringType)
-            .add("id", new StructType().add("crmid", StringType))
-        )
-        .add("id", StringType)
-        .add("gender", StringType)
-        .add("salary", IntegerType)
+      .add("name", new StructType()
+        .add("firstname", StringType)
+        .add("middlename", StringType)
+        .add("id", new StructType().add("crmid", StringType))
+      )
+      .add("id", StringType)
+      .add("gender", StringType)
+      .add("salary", IntegerType)
 
     val structureSchema2 = new StructType()
-        .add("name", new StructType()
-            .add("middlename", StringType)
-            .add("lastname", StringType)
-            .add("id", new StructType().add("eccid", StringType))
-        )
-        .add("id", StringType)
-        .add("gender", StringType)
-        .add("salary", IntegerType)
+      .add("name", new StructType()
+        .add("middlename", StringType)
+        .add("lastname", StringType)
+        .add("id", new StructType().add("eccid", StringType))
+      )
+      .add("id", StringType)
+      .add("gender", StringType)
+      .add("salary", IntegerType)
 
 
     val df1 = spark.createDataFrame(sc.parallelize(structureData1), structureSchema1)

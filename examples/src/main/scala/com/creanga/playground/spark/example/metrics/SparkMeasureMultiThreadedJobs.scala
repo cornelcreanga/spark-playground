@@ -23,7 +23,7 @@ object SparkMeasureMultiThreadedJobs {
     for (i <- 1 to 5) {
       futures(i - 1) = Future({
         sc.setLocalProperty("job-context", "" + i)
-        sc.setLocalProperty("spark.jobGroup.id",""+i);
+        sc.setLocalProperty("spark.jobGroup.id", "" + i);
 
         val df = spark.read.load("/home/cornel/data" + i + ".parquet")
         val listener = new MetricListener("" + i)

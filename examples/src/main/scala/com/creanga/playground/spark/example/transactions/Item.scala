@@ -1,8 +1,8 @@
 package com.creanga.playground.spark.example.transactions
 
-import java.io.{ObjectInputStream, ObjectOutputStream}
-
 import com.google.common.io.ByteStreams
+
+import java.io.{ObjectInputStream, ObjectOutputStream}
 
 sealed trait Item
 
@@ -22,10 +22,10 @@ case class SimpleItem(var id: String, var key: String, var body: Array[Byte]) ex
 }
 
 case class TransactionalItem(var item: SimpleItem,
-    var transactionId: String, //unique transaction identifier
-    var transactionIdItems: Int, //no of items from a transaction
-    var transactionItemId: Int //item no (used for ordering items in a transaction)
-) extends Item with Serializable {
+                             var transactionId: String, //unique transaction identifier
+                             var transactionIdItems: Int, //no of items from a transaction
+                             var transactionItemId: Int //item no (used for ordering items in a transaction)
+                            ) extends Item with Serializable {
 
 
   private def writeObject(out: ObjectOutputStream): Unit = {

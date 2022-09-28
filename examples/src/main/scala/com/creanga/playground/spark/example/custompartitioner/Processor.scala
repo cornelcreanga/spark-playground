@@ -2,7 +2,7 @@ package com.creanga.playground.spark.example.custompartitioner
 
 import org.apache.spark.TaskContext
 
-sealed trait ProcessorResult{
+sealed trait ProcessorResult {
   val itemsNo: Long
 }
 

@@ -1,14 +1,11 @@
 package com.creanga.playground.spark.example.custompartitioner;
 
-import org.apache.commons.math3.util.Pair;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.broadcast.Broadcast;
-import org.apache.spark.sql.SparkSession;
 import org.apache.spark.storage.StorageLevel;
 import scala.Tuple2;
 import scala.Tuple3;
@@ -18,7 +15,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.creanga.playground.spark.example.custompartitioner.CustomPartitioner.computePartitionDistribution;
 import static com.creanga.playground.spark.util.IOUtils.getResourceFileAsStream;
@@ -39,7 +35,6 @@ public class CustomPartitionerDemo {
     }
 
 
-
     public static void main(String[] args) throws IOException {
         SparkConf conf = new SparkConf()
                 .setMaster("local[15]")
@@ -51,7 +46,7 @@ public class CustomPartitionerDemo {
         SparkContext sc = new SparkContext(conf);
         JavaSparkContext jsc = JavaSparkContext.fromSparkContext(sc);
         long t1, t2;
-        int partitions = 40 ;
+        int partitions = 40;
         int reservedPartitions = 0;
         int allocatablePartitions = partitions - reservedPartitions;
         int values = 10000000;

@@ -25,12 +25,12 @@ public class DatabatcherHttpServer {
             server.createContext("/customapi/loggers", new LoggersHandler());
             server.createContext("/customapi/classlocation", new ClassLocationHandler());
             server.start();
-        }catch (IOException e) {
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public void stop(){
+    public void stop() {
         server.stop(5);
     }
 

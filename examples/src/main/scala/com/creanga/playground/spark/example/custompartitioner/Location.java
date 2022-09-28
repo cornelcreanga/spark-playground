@@ -2,7 +2,7 @@ package com.creanga.playground.spark.example.custompartitioner;
 
 import java.io.Serializable;
 
-public class Location  implements Serializable {
+public class Location implements Serializable {
 
     String batchId;
     String id;
