@@ -39,8 +39,8 @@ object Example {
     val processor = new Processor()
     val partitionedRdd = randomRdd.map(item => (item.date, item)).partitionBy(new MonthPartitioner)
     val jobResults = sc.runJob(partitionedRdd, processor.processAndWriteData _)
-    val successfulResults = jobResults.filter(job=>job.isInstanceOf[ProcessorResultSuccessful])
-    val failedResults = jobResults.filter(job=>job.isInstanceOf[ProcessorResultFailed])
+    val successfulResults = jobResults.filter(job => job.isInstanceOf[ProcessorResultSuccessful])
+    val failedResults = jobResults.filter(job => job.isInstanceOf[ProcessorResultFailed])
     println(successfulResults.length)
     println(failedResults.length)
 

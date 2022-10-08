@@ -1,9 +1,9 @@
 package com.creanga.playground.spark.example.streaming.session
 
 import org.apache.spark.sql.functions.{col, udf}
-import org.apache.spark.sql.streaming.{GroupStateTimeout, OutputMode, Trigger}
-import org.apache.spark.{SparkConf, SparkContext}
+import org.apache.spark.sql.streaming.{GroupStateTimeout, Trigger}
 import org.apache.spark.sql.{Dataset, SQLContext, SaveMode, SparkSession}
+import org.apache.spark.{SparkConf, SparkContext}
 
 object KafkaSessionGenerator {
 
@@ -25,8 +25,8 @@ object KafkaSessionGenerator {
 
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf()
-        .setMaster("local[2]")
-        .setAppName("KafkaSessionProcessor")
+      .setMaster("local[2]")
+      .setAppName("KafkaSessionProcessor")
     val sc = new SparkContext(conf)
 
     val spark = SparkSession.builder().getOrCreate()
@@ -36,35 +36,35 @@ object KafkaSessionGenerator {
 
 
     val inputStream = spark.readStream
-        .format("kafka")
-        .option("kafka.bootstrap.servers", "localhost:9093")
-        .option("subscribe", "tripEvents,gpsEvents")
-        .option("startingOffsets", "latest")
-        .option("failOnDataLoss", "false")
-//        .option("minPartitions", "32")//spark>=2.4.5
-        .load()
+      .format("kafka")
+      .option("kafka.bootstrap.servers", "localhost:9093")
+      .option("subscribe", "tripEvents,gpsEvents")
+      .option("startingOffsets", "latest")
+      .option("failOnDataLoss", "false")
+      //        .option("minPartitions", "32")//spark>=2.4.5
+      .load()
 
     val tripDf = inputStream.
-//        repartition(8).
-        selectExpr("CAST(value AS STRING)").
-        withColumn("tripEventId", extractTripIdUDF(col("value"))).
-        filter(col("tripEventId").isNotNull).
-        groupByKey(row => row.getAs[String]("tripEventId"))
-        .mapGroupsWithState(GroupStateTimeout.NoTimeout())(Mapping.buildSessions)
+      //        repartition(8).
+      selectExpr("CAST(value AS STRING)").
+      withColumn("tripEventId", extractTripIdUDF(col("value"))).
+      filter(col("tripEventId").isNotNull).
+      groupByKey(row => row.getAs[String]("tripEventId"))
+      .mapGroupsWithState(GroupStateTimeout.NoTimeout())(Mapping.buildSessions)
 
     val query = tripDf.writeStream
-        .trigger(Trigger.ProcessingTime("60 seconds"))
-        .option("checkpointLocation", s"/tmp/localfiles/checkpoint/")
-        .outputMode("update")
-        .foreachBatch { (batchDF: Dataset[SessionInfo2], batchId: Long) =>
-          batchDF.
-//              coalesce(1).
-              write.
-              format("json").
-              mode(SaveMode.Overwrite).
-              save(s"/tmp/localfiles/sessions/$batchId")
-        }
-        .start
+      .trigger(Trigger.ProcessingTime("60 seconds"))
+      .option("checkpointLocation", s"/tmp/localfiles/checkpoint/")
+      .outputMode("update")
+      .foreachBatch { (batchDF: Dataset[SessionInfo2], batchId: Long) =>
+        batchDF.
+          //              coalesce(1).
+          write.
+          format("json").
+          mode(SaveMode.Overwrite).
+          save(s"/tmp/localfiles/sessions/$batchId")
+      }
+      .start
 
     query.awaitTermination()
 

@@ -26,8 +26,9 @@ public class SyntheticRddProvider implements Serializable {
     private final Broadcast<Map<String, Integer>> cidToEventSizeBroadcast;
 
     private static byte[] empty = new byte[10];
-    static{
-        Arrays.fill(empty,(byte)1);
+
+    static {
+        Arrays.fill(empty, (byte) 1);
     }
 
     public SyntheticRddProvider(JavaSparkContext jsc, List<Tuple3<String, Integer, Integer>> stats, int partitions, int values, Map<String, Object> context) {
@@ -62,7 +63,7 @@ public class SyntheticRddProvider implements Serializable {
                 String cid = distribution.sample();
                 byte[] event = new byte[cidToEventSize.get(cid)];
                 for (int j = 0; j < event.length; j++) {
-                    event[j] = (byte)(65+fastRandom.nextInt(26));
+                    event[j] = (byte) (65 + fastRandom.nextInt(26));
                 }
 //                fastRandom.nextBytes(event);
                 list.add(new Tuple2<>(cid, event));

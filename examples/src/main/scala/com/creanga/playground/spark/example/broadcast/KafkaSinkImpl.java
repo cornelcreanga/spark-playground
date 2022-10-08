@@ -38,6 +38,6 @@ public class KafkaSinkImpl<K, V> implements KafkaSink<K, V> {
         if (instance == null) {
             instance = new KafkaSinkImpl<K, V>(properties -> new KafkaProducer<K, V>(config), config);
         }
-        return (KafkaSinkImpl<K, V>)instance;
+        return (KafkaSinkImpl<K, V>) instance;
     }
 }

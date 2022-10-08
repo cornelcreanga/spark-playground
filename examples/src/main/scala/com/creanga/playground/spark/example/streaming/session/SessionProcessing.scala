@@ -1,8 +1,5 @@
 package com.creanga.playground.spark.example.streaming.session
 
-import scala.concurrent.ExecutionContext.Implicits.global
-import scala.concurrent.Future
-
 import com.creanga.playground.spark.util.Mapper.plainMapper
 import org.apache.spark.sql.execution.streaming.MemoryStream
 import org.apache.spark.sql.expressions.UserDefinedFunction
@@ -10,6 +7,9 @@ import org.apache.spark.sql.functions.{col, udf}
 import org.apache.spark.sql.streaming.{GroupStateTimeout, OutputMode, Trigger}
 import org.apache.spark.sql.{Dataset, SQLContext, SaveMode, SparkSession}
 import org.apache.spark.{SparkConf, SparkContext}
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 
 case class TickProducer(data: MemoryStream[String]) {
   private var prev = 0
@@ -57,8 +57,8 @@ object SessionProcessing {
   def main(args: Array[String]): Unit = {
 
     val conf = new SparkConf()
-        .setMaster("local[4]")
-        .setAppName("SessionProcessing")
+      .setMaster("local[4]")
+      .setAppName("SessionProcessing")
     val sc = new SparkContext(conf)
     val spark = SparkSession.builder().getOrCreate()
     implicit val sqlContext: SQLContext = spark.sqlContext
@@ -86,21 +86,21 @@ object SessionProcessing {
     }
 
     val tripDf = data.toDF().
-        withColumn("driverId", extractDriverIdUDF(col("value"))).
-        filter(col("driverId").isNotNull).
-        groupByKey(row => row.getAs[String]("driverId"))
-        .flatMapGroupsWithState(OutputMode.Append, GroupStateTimeout.NoTimeout())(Mapping.filterNonSessionGpsEvents)
+      withColumn("driverId", extractDriverIdUDF(col("value"))).
+      filter(col("driverId").isNotNull).
+      groupByKey(row => row.getAs[String]("driverId"))
+      .flatMapGroupsWithState(OutputMode.Append, GroupStateTimeout.NoTimeout())(Mapping.filterNonSessionGpsEvents)
 
     val query = tripDf.writeStream
-        .trigger(Trigger.ProcessingTime("10 seconds"))
-        .foreachBatch { (batchDF: Dataset[GpsTick], batchId: Long) =>
-          //batchDF.show(20, truncate = false)
-          batchDF.coalesce(1).write.
-              format("json").
-              mode(SaveMode.Overwrite).
-              save(s"/home/cornel/stream/$batchId")
-        }
-        .start
+      .trigger(Trigger.ProcessingTime("10 seconds"))
+      .foreachBatch { (batchDF: Dataset[GpsTick], batchId: Long) =>
+        //batchDF.show(20, truncate = false)
+        batchDF.coalesce(1).write.
+          format("json").
+          mode(SaveMode.Overwrite).
+          save(s"/home/cornel/stream/$batchId")
+      }
+      .start
 
 
     query.awaitTermination()

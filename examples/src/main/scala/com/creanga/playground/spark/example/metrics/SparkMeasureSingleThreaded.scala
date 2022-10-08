@@ -7,8 +7,8 @@ object SparkMeasureSingleThreaded {
 
   def main(args: Array[String]): Unit = {
     val spark = SparkSession.builder()
-        .appName("Streaming events").master("local[2]")
-        .getOrCreate()
+      .appName("Streaming events").master("local[2]")
+      .getOrCreate()
     val sc = spark.sparkContext
 
     val structureData1 = Seq(
@@ -19,14 +19,14 @@ object SparkMeasureSingleThreaded {
     )
 
     val structureSchema1 = new StructType()
-        .add("name", new StructType()
-            .add("firstname", StringType)
-            .add("middlename", StringType)
-            .add("id", new StructType().add("crmid", StringType))
-        )
-        .add("id", StringType)
-        .add("gender", StringType)
-        .add("salary", IntegerType)
+      .add("name", new StructType()
+        .add("firstname", StringType)
+        .add("middlename", StringType)
+        .add("id", new StructType().add("crmid", StringType))
+      )
+      .add("id", StringType)
+      .add("gender", StringType)
+      .add("salary", IntegerType)
 
     val df1 = spark.createDataFrame(sc.parallelize(structureData1), structureSchema1)
 
@@ -34,9 +34,9 @@ object SparkMeasureSingleThreaded {
     val stageMetrics = ch.cern.sparkmeasure.StageMetrics(spark)
     stageMetrics.begin()
     df1.write.
-        format("json").
-        mode(SaveMode.Overwrite).
-        save("/tmp/temp/")
+      format("json").
+      mode(SaveMode.Overwrite).
+      save("/tmp/temp/")
 
     stageMetrics.end()
     var map = stageMetrics.reportMap()

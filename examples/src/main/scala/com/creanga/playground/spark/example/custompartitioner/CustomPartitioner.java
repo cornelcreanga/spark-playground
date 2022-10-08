@@ -20,7 +20,7 @@ public class CustomPartitioner extends Partitioner implements Serializable {
         this.reservedPartitions = reservedPartitions;
     }
 
-    public static Map<String, PartitionDistribution> computePartitionDistribution(Map<String, Long> keysToCost, int allocatablePartitions){
+    public static Map<String, PartitionDistribution> computePartitionDistribution(Map<String, Long> keysToCost, int allocatablePartitions) {
 
         long no = 0;
         List<String> keys = new ArrayList<>(keysToCost.keySet());
@@ -94,7 +94,7 @@ public class CustomPartitioner extends Partitioner implements Serializable {
         if (partitionDistribution != null) {
             return partitionDistribution.getPartition();
         } else {
-            if (reservedPartitions == 0){
+            if (reservedPartitions == 0) {
                 throw new RuntimeException("no reserved partitions are allocated, can't repartition the key " + partitionKey);
             }
             return (partitions - reservedPartitions) + key.hashCode() % reservedPartitions;

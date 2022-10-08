@@ -105,7 +105,7 @@ public class RangeVsHashPartitioner {
             long size = 0;
             while (it.hasNext()) {
                 it.next();
-                size ++;
+                size++;
             }
             return Collections.singleton(new Tuple2<>(TaskContext.getPartitionId(), size)).iterator();
         }).collect();

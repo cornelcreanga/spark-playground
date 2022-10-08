@@ -1,19 +1,19 @@
 package com.creanga.playground.spark.example.transactions
 
-import java.util.UUID
-
 import com.creanga.playground.spark.util.RandomRDD
 import com.creanga.playground.spark.util.Utils.randomArray
 import org.apache.spark.storage.StorageLevel
 import org.apache.spark.{SparkConf, SparkContext}
 
+import java.util.UUID
+
 object StreamingTransactionExample {
 
   def main(args: Array[String]): Unit = {
     val conf = new SparkConf()
-        .setMaster("local[2]")
-        .setAppName("StreamingTransactionExample")
-        .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+      .setMaster("local[2]")
+      .setAppName("StreamingTransactionExample")
+      .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
     val sc = new SparkContext(conf)
 
     //in real life we'll receive this data as a stream

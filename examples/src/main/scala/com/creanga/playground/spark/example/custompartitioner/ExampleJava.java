@@ -4,24 +4,21 @@ import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.*;
+import org.apache.spark.api.java.function.Function;
+import org.apache.spark.api.java.function.Function2;
+import org.apache.spark.api.java.function.PairFunction;
+import org.apache.spark.api.java.function.VoidFunction;
 import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.SparkSession;
-import scala.Array;
-import scala.Tuple1;
 import scala.Tuple2;
 import scala.reflect.ClassTag;
 import scala.reflect.ClassTag$;
 import scala.runtime.AbstractFunction1;
-import scala.runtime.AbstractFunction2;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
-
-import static org.apache.avro.SchemaBuilder.map;
 
 public class ExampleJava {
 
@@ -75,14 +72,10 @@ public class ExampleJava {
         metadata.add(new LocationMetadata(new Location("1", "180", 2500), new String[]{"a", "b"}));
 
 
-
-
         RDD<String> rdd = sc.parallelize(paths).rdd();
 
 
-
         JavaRDD<LocationMetadata> metadataRdd = sc.parallelize(metadata);
-
 
 
         long totalSize = metadataRdd.
@@ -113,7 +106,7 @@ public class ExampleJava {
             return list.iterator();
         });
 
-        List<List<LocationMetadata>> collected= metadataRddList.collect();
+        List<List<LocationMetadata>> collected = metadataRddList.collect();
         collected.forEach(System.out::println);
         System.out.println(metadataRddList.count());
 
@@ -124,15 +117,18 @@ public class ExampleJava {
 
         //metadataRddList.repartition(sc.defaultParallelism());
         System.out.println("--------------------------------------------");
-        metadataRddList.foreachPartition((VoidFunction<Iterator<List<LocationMetadata>>>) listIterator ->{
+        metadataRddList.foreachPartition((VoidFunction<Iterator<List<LocationMetadata>>>) listIterator -> {
             int c = 0;
-            while(listIterator.hasNext()) {c++;listIterator.next();}
+            while (listIterator.hasNext()) {
+                c++;
+                listIterator.next();
+            }
             System.out.println(TaskContext.getPartitionId() + "-" + c);
-                });
+        });
 
         System.out.println("--------------------------------------------");
-        System.out.println("count:"+metadataRddList.count());
-        JavaRDD<List<LocationMetadata>> repartitioned = metadataRddList.repartition((int)metadataRddList.count());
+        System.out.println("count:" + metadataRddList.count());
+        JavaRDD<List<LocationMetadata>> repartitioned = metadataRddList.repartition((int) metadataRddList.count());
         repartitioned.foreachPartition((VoidFunction<Iterator<List<LocationMetadata>>>) listIterator ->
                 listIterator.forEachRemaining(locationMetadata ->
                         locationMetadata.forEach(locationMetadata1 ->
@@ -154,7 +150,7 @@ public class ExampleJava {
 
                             @Override
                             public Object apply(Tuple2<Location, String[]> v1) {
-                               // System.out.println(TaskContext.getPartitionId() + "-" + v1._1);
+                                // System.out.println(TaskContext.getPartitionId() + "-" + v1._1);
                                 return null;
                             }
                         });

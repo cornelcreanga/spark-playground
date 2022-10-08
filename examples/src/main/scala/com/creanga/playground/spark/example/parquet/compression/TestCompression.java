@@ -22,7 +22,7 @@ public class TestCompression {
         Dataset<Row> parquetFileDF = sparkSession.read().parquet("/home/cornel/parquetdata/init");
         parquetFileDF.persist(StorageLevel.MEMORY_ONLY_SER());
         long t2 = System.currentTimeMillis();
-        System.out.println("read:"+(t2 - t1));
+        System.out.println("read:" + (t2 - t1));
 
 
         t1 = System.currentTimeMillis();
@@ -32,7 +32,7 @@ public class TestCompression {
                 option("compression", "none").
                 parquet("/home/cornel/parquetdata/none");
         t2 = System.currentTimeMillis();
-        System.out.println("write none"+(t2 - t1));
+        System.out.println("write none" + (t2 - t1));
 
         t1 = System.currentTimeMillis();
         parquetFileDF.
@@ -41,7 +41,7 @@ public class TestCompression {
                 option("compression", "zstd").
                 parquet("/home/cornel/parquetdata/zstd");
         t2 = System.currentTimeMillis();
-        System.out.println("write zstd"+(t2 - t1));
+        System.out.println("write zstd" + (t2 - t1));
 
         t1 = System.currentTimeMillis();
         parquetFileDF.
@@ -50,7 +50,7 @@ public class TestCompression {
                 option("compression", "gzip").
                 parquet("/home/cornel/parquetdata/gzip");
         t2 = System.currentTimeMillis();
-        System.out.println("write gzip"+(t2 - t1));
+        System.out.println("write gzip" + (t2 - t1));
 
         t1 = System.currentTimeMillis();
         parquetFileDF.
@@ -59,7 +59,7 @@ public class TestCompression {
                 option("compression", "snappy").
                 parquet("/home/cornel/parquetdata/snappy");
         t2 = System.currentTimeMillis();
-        System.out.println("write snappy"+(t2 - t1));
+        System.out.println("write snappy" + (t2 - t1));
 
         t1 = System.currentTimeMillis();
         parquetFileDF.
@@ -68,7 +68,7 @@ public class TestCompression {
                 option("compression", "lz4").
                 parquet("/home/cornel/parquetdata/lz4");
         t2 = System.currentTimeMillis();
-        System.out.println("write lz4"+(t2 - t1));
+        System.out.println("write lz4" + (t2 - t1));
 
     }
 }
