@@ -87,27 +87,29 @@ public class CustomPartitionerDemo {
         t1 = System.currentTimeMillis();
         JavaPairRDD<String, byte[]> repartitionedRDD = pairRDD.repartitionAndSortWithinPartitions(new CustomPartitioner(distributionBroadcast, partitions, reservedPartitions));
 
-        Map<Integer, Map<String, Integer>> distribution = repartitionedRDD.mapPartitionsToPair(it -> {
-            Map<String, Integer> f = new HashMap<>();
-            it.forEachRemaining(t -> {
-                Integer previous = f.get(t._1);
-                if (previous == null) {
-                    f.put(t._1, 1);
-                } else {
-                    f.put(t._1, previous + 1);
-                }
-            });
-            return Collections.singletonList(new Tuple2<>(TaskContext.getPartitionId(), f)).iterator();
-        }).collectAsMap();
-
-        Map<Integer, Integer> info = new HashMap<>();
-        distribution.forEach((integer, map) -> info.put(integer, map.size()));
-        System.out.println(info.toString());
-
-
-        //System.out.println(repartitionedRDD.count());
-        t2 = System.currentTimeMillis();
-        System.out.println(t2 - t1);
+        repartitionedRDD.count();
+//
+//        Map<Integer, Map<String, Integer>> distribution = repartitionedRDD.mapPartitionsToPair(it -> {
+//            Map<String, Integer> f = new HashMap<>();
+//            it.forEachRemaining(t -> {
+//                Integer previous = f.get(t._1);
+//                if (previous == null) {
+//                    f.put(t._1, 1);
+//                } else {
+//                    f.put(t._1, previous + 1);
+//                }
+//            });
+//            return Collections.singletonList(new Tuple2<>(TaskContext.getPartitionId(), f)).iterator();
+//        }).collectAsMap();
+//
+//        Map<Integer, Integer> info = new HashMap<>();
+//        distribution.forEach((integer, map) -> info.put(integer, map.size()));
+//        System.out.println(info.toString());
+//
+//
+//        //System.out.println(repartitionedRDD.count());
+//        t2 = System.currentTimeMillis();
+//        System.out.println(t2 - t1);
         System.in.read();
 
     }

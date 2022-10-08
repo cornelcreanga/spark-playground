@@ -58,7 +58,7 @@ public class CustomPartitioner extends Partitioner implements Serializable {
                     keyPartition = 0;
                 }
             }
-            if (!list.isEmpty()) {//last element might be left out due to double precission loss
+            if (!list.isEmpty()) {//last element might be left out due to double precision loss
                 keyPartitionProbabilities.put(keys.get(i), list);
             } else {
                 keyPartitionProbabilities.put(keys.get(i), Collections.singletonList(new PartitionInfo(partitionAvailabilities.length - 1, 1d)));

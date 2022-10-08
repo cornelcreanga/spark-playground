@@ -1,13 +1,12 @@
 package com.creanga.playground.spark.example.custompartitioner;
 
 import com.creanga.playground.spark.util.FastRandom;
-import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.spark.*;
+import org.apache.spark.HashPartitioner;
+import org.apache.spark.RangePartitioner;
+import org.apache.spark.SparkConf;
+import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.VoidFunction;
-import org.apache.spark.sql.SparkSession;
 import org.apache.spark.storage.StorageLevel;
 import scala.Tuple2;
 import scala.Tuple3;
@@ -22,7 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-public class RangePartitionerDemo {
+public class HashPartitionerDemo {
 
     public static void main(String[] args) throws IOException {
         SparkConf conf = new SparkConf()
@@ -87,6 +86,9 @@ public class RangePartitionerDemo {
             }
         }));
 
+        JavaPairRDD<String, byte[]> hashRepartitionedRDD = saltedPairRDD.repartitionAndSortWithinPartitions(new HashPartitioner(partitions));
+
+        hashRepartitionedRDD.count();
         Ordering<String> ordering = Ordering$.MODULE$.comparatorToOrdering(Comparator.<String>naturalOrder());
         ClassTag<String> classTag = ClassTag$.MODULE$.apply(String.class);
         RangePartitioner<String, byte[]> partitioner = new RangePartitioner<>(partitions, saltedPairRDD.rdd(), true, ordering, classTag);
@@ -95,5 +97,7 @@ public class RangePartitionerDemo {
         rangeRepartitionedRDD.count();
 
         System.in.read();
+
     }
+
 }
