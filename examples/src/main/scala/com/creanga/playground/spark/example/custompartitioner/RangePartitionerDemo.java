@@ -1,13 +1,10 @@
 package com.creanga.playground.spark.example.custompartitioner;
 
+import com.creanga.playground.spark.example.partitioner.SyntheticRddProvider;
 import com.creanga.playground.spark.util.FastRandom;
-import com.google.common.collect.ImmutableMap;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.spark.*;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.VoidFunction;
-import org.apache.spark.sql.SparkSession;
 import org.apache.spark.storage.StorageLevel;
 import scala.Tuple2;
 import scala.Tuple3;

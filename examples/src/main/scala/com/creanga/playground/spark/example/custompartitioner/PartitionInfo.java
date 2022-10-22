@@ -4,8 +4,8 @@ import java.io.Serializable;
 
 public class PartitionInfo implements Serializable {
 
-    private int partition;
-    private double probability;
+    private final int partition;
+    private final double probability;
 
     public PartitionInfo(int partition, double probability) {
         this.partition = partition;

@@ -20,7 +20,7 @@ public class CustomPartitioner extends Partitioner implements Serializable {
         this.reservedPartitions = reservedPartitions;
     }
 
-    public static Map<String, PartitionDistribution> computePartitionDistribution(Map<String, Long> keysToCost, int allocatablePartitions) {
+    public static PartitioningInfo computePartitionDistribution(Map<String, Long> keysToCost, long partitionCost) {
 
         long no = 0;
         List<String> keys = new ArrayList<>(keysToCost.keySet());
@@ -29,13 +29,14 @@ public class CustomPartitioner extends Partitioner implements Serializable {
         for (long cost : keyCosts) {
             no += cost;
         }
-
-        long partitionCapacity = no / allocatablePartitions;
+        //compute how many partitions do we need
+        int partitions = (int) Math.max(no / partitionCost, 1);
+        //compute weigths per item. if weight is more than 1 the items will be located in more than one partition
         for (int i = 0; i < keyCosts.size(); i++) {
-            keysWeights[i] = (double) keyCosts.get(i) / partitionCapacity;
+            keysWeights[i] = (double) keyCosts.get(i) / partitionCost;
         }
 
-        double[] partitionAvailabilities = new double[allocatablePartitions];
+        double[] partitionAvailabilities = new double[partitions];
         Arrays.fill(partitionAvailabilities, 1);
         Map<String, List<PartitionInfo>> keyPartitionProbabilities = new HashMap<>();
         for (int i = 0; i < keyCosts.size(); i++) {
@@ -78,7 +79,7 @@ public class CustomPartitioner extends Partitioner implements Serializable {
                 distributionMap.put(uuid, new PartitionDistribution(pairs));
             }
         }
-        return distributionMap;
+        return new PartitioningInfo(partitions, distributionMap);
 
     }
 

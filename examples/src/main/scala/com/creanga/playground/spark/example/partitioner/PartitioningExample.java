@@ -1,13 +1,12 @@
-package com.creanga.playground.spark.example.custompartitioner;
+package com.creanga.playground.spark.example.partitioner;
 
-import com.creanga.playground.spark.example.partitioner.SyntheticRddProvider;
+import com.creanga.playground.spark.example.custompartitioner.CustomPartitionerDemo;
 import com.creanga.playground.spark.util.FastRandom;
-import org.apache.spark.HashPartitioner;
-import org.apache.spark.RangePartitioner;
-import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.spark.*;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
+import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.storage.StorageLevel;
 import scala.Tuple2;
 import scala.Tuple3;
@@ -21,24 +20,23 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.function.BiConsumer;
 
-public class HashPartitionerDemo {
+public class PartitioningExample {
 
     public static void main(String[] args) throws IOException {
         SparkConf conf = new SparkConf()
                 .setMaster("local[15]")
                 .setAppName("Partition demo")
-                .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-                .set("spark.io.compression.codec", "lz4")
-                .set("spark.io.compression.lz4.blockSize", "256k")
-                .set("spark.rdd.compress", "true");
+                .set("spark.driver.memoryOverheadFactor", "0.05")
+                .set("spark.memory.fraction", "0.8");
         SparkContext sc = new SparkContext(conf);
         JavaSparkContext jsc = JavaSparkContext.fromSparkContext(sc);
-
+        long t1, t2;
         int partitions = 40;
         int reservedPartitions = 0;
         int allocatablePartitions = partitions - reservedPartitions;
-        int values = 10000000;
+        int values = 10_000_000;
 
         List<Tuple3<String, Integer, Integer>> stats = new ArrayList<>();
         try (InputStream in = CustomPartitionerDemo.class.getResourceAsStream("/stats.csv"); //cid, eventNo, eventsTotalsize, eventsTotalsize/eventNo
@@ -60,8 +58,8 @@ public class HashPartitionerDemo {
         //compute frequencies for all the items
         //for each uuid we will compute cost = sum of all byte[]messages length
         Map<String, Long> freqs = pairRDD.mapToPair(t -> new Tuple2<>(t._1, (long) t._2.length)).reduceByKeyLocally(Long::sum);
+        System.out.println("total keys " + freqs.size());
         Map<String, Integer> saltingInfo = new HashMap<>();
-
         long no = 0;
         List<String> keys = new ArrayList<>(freqs.keySet());
         List<Long> keyCosts = new ArrayList<>(freqs.values());
@@ -70,6 +68,7 @@ public class HashPartitionerDemo {
             no += cost;
         }
 
+        //hash partitioner
         long partitionCapacity = no / allocatablePartitions;
         for (int i = 0; i < keyCosts.size(); i++) {
             keysWeights[i] = (double) keyCosts.get(i) / partitionCapacity;
@@ -88,17 +87,59 @@ public class HashPartitionerDemo {
         }));
 
         JavaPairRDD<String, byte[]> hashRepartitionedRDD = saltedPairRDD.repartitionAndSortWithinPartitions(new HashPartitioner(partitions));
+        JavaPairRDD<String, byte[]> unsaltedHashedRDD = getUnsaltedRDD(hashRepartitionedRDD);
+        Map<Integer, Map<String, Integer>> distribution = computeDistribution(unsaltedHashedRDD);
 
-        hashRepartitionedRDD.count();
+        long distinctGroups = getDistinctGroups(distribution);
+        System.out.println("hash distinct groups " + distinctGroups);
+
         Ordering<String> ordering = Ordering$.MODULE$.comparatorToOrdering(Comparator.<String>naturalOrder());
         ClassTag<String> classTag = ClassTag$.MODULE$.apply(String.class);
         RangePartitioner<String, byte[]> partitioner = new RangePartitioner<>(partitions, saltedPairRDD.rdd(), true, ordering, classTag);
 
         JavaPairRDD<String, byte[]> rangeRepartitionedRDD = saltedPairRDD.repartitionAndSortWithinPartitions(partitioner);
-        rangeRepartitionedRDD.count();
-
-        System.in.read();
+        JavaPairRDD<String, byte[]> unsaltedRepartitionedRDD = getUnsaltedRDD(rangeRepartitionedRDD);
+        distribution = computeDistribution(unsaltedRepartitionedRDD);
+        distinctGroups = getDistinctGroups(distribution);
+        System.out.println("range distinct groups " + distinctGroups);
 
     }
+
+    private static JavaPairRDD<String, byte[]> getUnsaltedRDD(JavaPairRDD<String, byte[]> rdd) {
+        return rdd.mapToPair(t -> {
+            String key = t._1;
+            if (!key.contains("_")) {
+                return t;
+            } else {
+                return new Tuple2<>(StringUtils.substringBefore(key, "_"), t._2);
+            }
+        });
+    }
+
+    private static long getDistinctGroups(Map<Integer, Map<String, Integer>> distribution) {
+        long distinctGroups = 0;
+        Collection<Map<String, Integer>> distributionValues = distribution.values();
+        for (Iterator<Map<String, Integer>> iterator = distributionValues.iterator(); iterator.hasNext(); ) {
+            Map<String, Integer> next = iterator.next();
+            distinctGroups += next.size();
+        }
+        return distinctGroups;
+    }
+
+    private static Map<Integer, Map<String, Integer>> computeDistribution(JavaPairRDD<String, byte[]> rdd){
+        return rdd.mapPartitionsToPair(it -> {
+            Map<String, Integer> f = new HashMap<>();
+            it.forEachRemaining(t -> {
+                Integer previous = f.get(t._1);
+                if (previous == null) {
+                    f.put(t._1, 1);
+                } else {
+                    f.put(t._1, previous + 1);
+                }
+            });
+            return Collections.singletonList(new Tuple2<>(TaskContext.getPartitionId(), f)).iterator();
+        }).collectAsMap();
+    }
+
 
 }

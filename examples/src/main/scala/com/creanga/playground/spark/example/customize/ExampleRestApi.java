@@ -1,6 +1,6 @@
 package com.creanga.playground.spark.example.customize;
 
-import com.creanga.playground.spark.example.rest.DatabatcherHttpServer;
+import com.creanga.playground.spark.example.rest.SparkSimpleHttpServer;
 import org.apache.spark.sql.SparkSession;
 
 import java.io.IOException;
@@ -15,8 +15,8 @@ public class ExampleRestApi {
                 .config("spark.master.rest.enabled", "true")
                 .getOrCreate();
 
-        DatabatcherHttpServer databatcherHttpServer = new DatabatcherHttpServer(4041);
-        databatcherHttpServer.start();
+        SparkSimpleHttpServer sparkSimpleHttpServer = new SparkSimpleHttpServer(4041);
+        sparkSimpleHttpServer.start();
         Thread.sleep(600000);
 
     }

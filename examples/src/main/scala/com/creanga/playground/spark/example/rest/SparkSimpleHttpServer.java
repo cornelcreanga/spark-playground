@@ -7,12 +7,12 @@ import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 
-public class DatabatcherHttpServer {
+public class SparkSimpleHttpServer {
 
     private HttpServer server;
     private int port;
 
-    public DatabatcherHttpServer(int port) {
+    public SparkSimpleHttpServer(int port) {
         this.port = port;
     }
 

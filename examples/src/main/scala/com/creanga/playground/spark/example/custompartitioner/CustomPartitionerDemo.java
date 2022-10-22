@@ -1,8 +1,8 @@
 package com.creanga.playground.spark.example.custompartitioner;
 
+import com.creanga.playground.spark.example.partitioner.SyntheticRddProvider;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
-import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.broadcast.Broadcast;
@@ -46,10 +46,11 @@ public class CustomPartitionerDemo {
         SparkContext sc = new SparkContext(conf);
         JavaSparkContext jsc = JavaSparkContext.fromSparkContext(sc);
         long t1, t2;
+        long partitionCapacity = 300_000_000;
         int partitions = 40;
         int reservedPartitions = 0;
-        int allocatablePartitions = partitions - reservedPartitions;
-        int values = 10000000;
+
+        int values = 10_000_000;
 
         List<Tuple3<String, Integer, Integer>> stats = new ArrayList<>();
         try (InputStream in = CustomPartitionerDemo.class.getResourceAsStream("/stats.csv"); //cid, eventNo, eventsTotalsize, eventsTotalsize/eventNo
@@ -72,15 +73,14 @@ public class CustomPartitionerDemo {
         //for each uuid we will compute cost = sum of all byte[]messages length
         Map<String, Long> freqs = pairRDD.mapToPair(t -> new Tuple2<>(t._1, (long) t._2.length)).reduceByKeyLocally(Long::sum);
 
-        t1 = System.currentTimeMillis();
-        Map<String, PartitionDistribution> distributionMap = computePartitionDistribution(freqs, allocatablePartitions);
-        t2 = System.currentTimeMillis();
-        System.out.println(t2 - t1);
+        PartitioningInfo partitioningInfo = computePartitionDistribution(freqs, partitionCapacity);
+        Map<String, PartitionDistribution> distributionMap = partitioningInfo.getDistributionMap();
+        System.out.println("No of partitions " + partitioningInfo.getPartitionNo());
 
         Broadcast<Map<String, PartitionDistribution>> distributionBroadcast = jsc.broadcast(distributionMap);
 
         t1 = System.currentTimeMillis();
-        JavaPairRDD<String, byte[]> repartitionedRDD = pairRDD.repartitionAndSortWithinPartitions(new CustomPartitioner(distributionBroadcast, partitions, reservedPartitions));
+        JavaPairRDD<String, byte[]> repartitionedRDD = pairRDD.repartitionAndSortWithinPartitions(new CustomPartitioner(distributionBroadcast, partitioningInfo.getPartitionNo(), reservedPartitions));
 
         repartitionedRDD.count();
 //

@@ -1,4 +1,4 @@
-package com.creanga.playground.spark.example.custompartitioner;
+package com.creanga.playground.spark.example.partitioner;
 
 import com.creanga.playground.spark.util.FastRandom;
 import com.creanga.playground.spark.util.RDDGenerator;
@@ -25,7 +25,7 @@ public class SyntheticRddProvider implements Serializable {
     private final Broadcast<EnumeratedDistribution<String>> distributionBroadcast;
     private final Broadcast<Map<String, Integer>> cidToEventSizeBroadcast;
 
-    private static byte[] empty = new byte[10];
+    private static byte[] empty = new byte[1];
 
     static {
         Arrays.fill(empty, (byte) 1);
@@ -62,6 +62,8 @@ public class SyntheticRddProvider implements Serializable {
             for (int i = 0; i < itemNumber; i++) {
                 String cid = distribution.sample();
                 byte[] event = new byte[cidToEventSize.get(cid)];
+                //byte[] event = empty;
+                //byte[] event = new byte[cidToEventSize.get(cid)];
                 for (int j = 0; j < event.length; j++) {
                     event[j] = (byte) (65 + fastRandom.nextInt(26));
                 }

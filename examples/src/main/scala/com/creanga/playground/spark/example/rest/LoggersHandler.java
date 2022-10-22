@@ -11,8 +11,10 @@ import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.SparkSession;
 
 import java.io.IOException;
+import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Properties;
 
 public class LoggersHandler extends DefaultHttpHandler {
 
@@ -27,7 +29,22 @@ public class LoggersHandler extends DefaultHttpHandler {
             if (sparkSession == null) {
                 response(httpExchange, 500, "internal error, this should never happen unless the Spark context was not started.");
             } else {
-                String level = IOUtils.toString(httpExchange.getRequestBody(), StandardCharsets.UTF_8.name());
+                String body = IOUtils.toString(httpExchange.getRequestBody(), StandardCharsets.UTF_8.name());
+                //if no body assume level is info and scope = driver
+                String level;
+                String scope;
+                if (body == null){
+                    level = "info";
+                    scope = "driver";
+                }else{
+                    body = body.replaceAll(";","\n");
+                    Properties p = new Properties();
+                    p.load(new StringReader(body));
+                    level = p.getProperty("level");
+                    scope = p.getProperty("scope");
+                }
+                boolean driverOnly = !"executors".equalsIgnoreCase(scope);
+
                 Level logLevel = Level.toLevel(level, Level.INFO);
                 boolean rootLogger = "root".equalsIgnoreCase(logger);
 
@@ -36,16 +53,20 @@ public class LoggersHandler extends DefaultHttpHandler {
 
                 if (rootLogger) {
                     Configurator.setRootLevel(logLevel);
-                    jsc.parallelize(new ArrayList<>()).foreachPartition(objectIterator -> {
-                        Configurator.setRootLevel(logLevel);
-                    });
+                    if (!driverOnly) {
+                        jsc.parallelize(new ArrayList<>()).foreachPartition(objectIterator -> {
+                            Configurator.setRootLevel(logLevel);
+                        });
+                    }
                 } else {
 
                     Configurator.setLevel(logger, logLevel);
 
-                    jsc.parallelize(new ArrayList<>()).foreachPartition(objectIterator -> {
-                        Configurator.setLevel(logger, logLevel);
-                    });
+                    if (!driverOnly) {
+                        jsc.parallelize(new ArrayList<>()).foreachPartition(objectIterator -> {
+                            Configurator.setLevel(logger, logLevel);
+                        });
+                    }
 
                 }
                 response(httpExchange, 200, logLevel.name());
