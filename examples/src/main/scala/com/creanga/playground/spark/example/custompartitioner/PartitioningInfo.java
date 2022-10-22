@@ -3,13 +3,14 @@ package com.creanga.playground.spark.example.custompartitioner;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.Map;
+import java.util.UUID;
 
 public class PartitioningInfo {
 
     private final int partitionNo;
-    private final Map<String, PartitionDistribution> distributionMap;
+    private final Map<UUID, PartitionDistribution> distributionMap;
 
-    public PartitioningInfo(int partitionNo, Map<String, PartitionDistribution> distributionMap) {
+    public PartitioningInfo(int partitionNo, Map<UUID, PartitionDistribution> distributionMap) {
         this.partitionNo = partitionNo;
         this.distributionMap = distributionMap;
     }
@@ -18,7 +19,7 @@ public class PartitioningInfo {
         return partitionNo;
     }
 
-    public Map<String, PartitionDistribution> getDistributionMap() {
+    public Map<UUID, PartitionDistribution> getDistributionMap() {
         return ImmutableMap.copyOf(distributionMap);
     }
 }

@@ -7,6 +7,7 @@ import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.broadcast.Broadcast;
 import org.apache.spark.storage.StorageLevel;
+import org.apache.spark.util.SizeEstimator;
 import scala.Tuple2;
 import scala.Tuple3;
 
@@ -52,13 +53,14 @@ public class CustomPartitionerDemo {
 
         int values = 10_000_000;
 
-        List<Tuple3<String, Integer, Integer>> stats = new ArrayList<>();
+
+        List<Tuple3<UUID, Integer, Integer>> stats = new ArrayList<>();
         try (InputStream in = CustomPartitionerDemo.class.getResourceAsStream("/stats.csv"); //cid, eventNo, eventsTotalsize, eventsTotalsize/eventNo
              BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] items = line.split("\t");
-                String cid = UUID.randomUUID().toString();
+                UUID cid = UUID.randomUUID();
                 stats.add(new Tuple3<>(cid, Integer.parseInt(items[0]), Integer.parseInt(items[1])));
             }
         } catch (Exception e) {
@@ -66,21 +68,24 @@ public class CustomPartitionerDemo {
         }
 
         SyntheticRddProvider rddProvider = new SyntheticRddProvider(jsc, stats, partitions, values, new HashMap<>());
-        JavaPairRDD<String, byte[]> pairRDD = rddProvider.buildRdd().mapToPair(stringTuple2 -> stringTuple2);
+        JavaPairRDD<UUID, byte[]> pairRDD = rddProvider.buildRdd().mapToPair(t -> t);
         pairRDD.persist(StorageLevel.MEMORY_ONLY());
 
         //compute frequencies for all the items
         //for each uuid we will compute cost = sum of all byte[]messages length
-        Map<String, Long> freqs = pairRDD.mapToPair(t -> new Tuple2<>(t._1, (long) t._2.length)).reduceByKeyLocally(Long::sum);
+        Map<UUID, Long> freqs = pairRDD.mapToPair(t -> new Tuple2<>(t._1, (long) t._2.length)).reduceByKeyLocally(Long::sum);
 
         PartitioningInfo partitioningInfo = computePartitionDistribution(freqs, partitionCapacity);
-        Map<String, PartitionDistribution> distributionMap = partitioningInfo.getDistributionMap();
+        Map<UUID, PartitionDistribution> distributionMap = partitioningInfo.getDistributionMap();
+
+        System.out.println("Distribution map size "+SizeEstimator.estimate(distributionMap));
+
         System.out.println("No of partitions " + partitioningInfo.getPartitionNo());
 
-        Broadcast<Map<String, PartitionDistribution>> distributionBroadcast = jsc.broadcast(distributionMap);
+        Broadcast<Map<UUID, PartitionDistribution>> distributionBroadcast = jsc.broadcast(distributionMap);
 
         t1 = System.currentTimeMillis();
-        JavaPairRDD<String, byte[]> repartitionedRDD = pairRDD.repartitionAndSortWithinPartitions(new CustomPartitioner(distributionBroadcast, partitioningInfo.getPartitionNo(), reservedPartitions));
+        JavaPairRDD<UUID, byte[]> repartitionedRDD = pairRDD.repartitionAndSortWithinPartitions(new CustomPartitioner(distributionBroadcast, partitioningInfo.getPartitionNo(), reservedPartitions));
 
         repartitionedRDD.count();
 //
@@ -108,5 +113,6 @@ public class CustomPartitionerDemo {
         System.in.read();
 
     }
+
 
 }

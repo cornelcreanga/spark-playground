@@ -12,18 +12,18 @@ public class CustomPartitioner extends Partitioner implements Serializable {
 
     private final int partitions;
     private final int reservedPartitions;
-    private final Map<String, PartitionDistribution> distribution;
+    private final Map<UUID, PartitionDistribution> distribution;
 
-    public CustomPartitioner(Broadcast<Map<String, PartitionDistribution>> distributionBroadcast, int partitions, int reservedPartitions) {
+    public CustomPartitioner(Broadcast<Map<UUID, PartitionDistribution>> distributionBroadcast, int partitions, int reservedPartitions) {
         this.distribution = distributionBroadcast.getValue();
         this.partitions = partitions;
         this.reservedPartitions = reservedPartitions;
     }
 
-    public static PartitioningInfo computePartitionDistribution(Map<String, Long> keysToCost, long partitionCost) {
+    public static PartitioningInfo computePartitionDistribution(Map<UUID, Long> keysToCost, long partitionCost) {
 
         long no = 0;
-        List<String> keys = new ArrayList<>(keysToCost.keySet());
+        List<UUID> keys = new ArrayList<>(keysToCost.keySet());
         List<Long> keyCosts = new ArrayList<>(keysToCost.values());
         double[] keysWeights = new double[keyCosts.size()];
         for (long cost : keyCosts) {
@@ -38,7 +38,7 @@ public class CustomPartitioner extends Partitioner implements Serializable {
 
         double[] partitionAvailabilities = new double[partitions];
         Arrays.fill(partitionAvailabilities, 1);
-        Map<String, List<PartitionInfo>> keyPartitionProbabilities = new HashMap<>();
+        Map<UUID, List<PartitionInfo>> keyPartitionProbabilities = new HashMap<>();
         for (int i = 0; i < keyCosts.size(); i++) {
             double keyPartition = keysWeights[i];
             List<PartitionInfo> list = new ArrayList<>();
@@ -66,10 +66,10 @@ public class CustomPartitioner extends Partitioner implements Serializable {
             }
         }
 
-        Map<String, PartitionDistribution> distributionMap = new HashMap<>();
-        Set<String> uuids = keyPartitionProbabilities.keySet();
+        Map<UUID, PartitionDistribution> distributionMap = new HashMap<>();
+        Set<UUID> uuids = keyPartitionProbabilities.keySet();
 
-        for (String uuid : uuids) {
+        for (UUID uuid : uuids) {
             List<PartitionInfo> list = keyPartitionProbabilities.get(uuid);
             //if we have 1 partition there is no need to build a heavyweight EnumeratedDistribution
             if (list.size() == 1) {
@@ -90,7 +90,7 @@ public class CustomPartitioner extends Partitioner implements Serializable {
 
     @Override
     public int getPartition(Object partitionKey) {
-        String key = (String) partitionKey;
+        UUID key = (UUID) partitionKey;
         PartitionDistribution partitionDistribution = distribution.get(key);
         if (partitionDistribution != null) {
             return partitionDistribution.getPartition();

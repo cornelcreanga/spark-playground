@@ -30,6 +30,7 @@
 
         <jackson.version>2.13.3</jackson.version>
         <mockneat.version>0.4.7</mockneat.version>
+        <sizeof.version>0.4.3</sizeof.version>
     </properties>
 
     <modules>
@@ -38,12 +39,6 @@
 
     <dependencyManagement>
     <dependencies>
-
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-servlet</artifactId>
-            <version>${jetty.version}</version>
-        </dependency>
 
         <dependency>
             <groupId>net.andreinc</groupId>
