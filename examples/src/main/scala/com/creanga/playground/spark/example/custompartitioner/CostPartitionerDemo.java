@@ -5,9 +5,8 @@ import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.broadcast.Broadcast;
+import org.apache.spark.sql.catalyst.optimizer.Cost;
 import org.apache.spark.storage.StorageLevel;
-import org.apache.spark.util.SizeEstimator;
 import scala.Tuple2;
 import scala.Tuple3;
 
@@ -17,10 +16,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
 
-import static com.creanga.playground.spark.example.custompartitioner.CustomPartitioner.computePartitionDistribution;
 import static com.creanga.playground.spark.util.IOUtils.getResourceFileAsStream;
 
-public class CustomPartitionerDemo {
+public class CostPartitionerDemo {
 
     String path = "/tmp/data";
 
@@ -38,7 +36,7 @@ public class CustomPartitionerDemo {
 
     public static void main(String[] args) throws IOException {
         SparkConf conf = new SparkConf()
-                .setMaster("local[15]")
+                .setMaster("local[7]")
                 .setAppName("Partition demo")
                 .set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
                 .set("spark.io.compression.codec", "lz4")
@@ -48,14 +46,14 @@ public class CustomPartitionerDemo {
         JavaSparkContext jsc = JavaSparkContext.fromSparkContext(sc);
         long t1, t2;
         long partitionCapacity = 300_000_000;
-        int partitions = 40;
+        int partitions = 20;
         int reservedPartitions = 0;
 
-        int values = 10_000_000;
+        int values = 5*1_000_000;
 
 
         List<Tuple3<UUID, Integer, Integer>> stats = new ArrayList<>();
-        try (InputStream in = CustomPartitionerDemo.class.getResourceAsStream("/stats.csv"); //cid, eventNo, eventsTotalsize, eventsTotalsize/eventNo
+        try (InputStream in = CostPartitionerDemo.class.getResourceAsStream("/stats.csv"); //cid, eventNo, eventsTotalsize, eventsTotalsize/eventNo
              BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = reader.readLine()) != null) {
@@ -71,21 +69,11 @@ public class CustomPartitionerDemo {
         JavaPairRDD<UUID, byte[]> pairRDD = rddProvider.buildRdd().mapToPair(t -> t);
         pairRDD.persist(StorageLevel.MEMORY_ONLY());
 
-        //compute frequencies for all the items
-        //for each uuid we will compute cost = sum of all byte[]messages length
-        Map<UUID, Long> freqs = pairRDD.mapToPair(t -> new Tuple2<>(t._1, (long) t._2.length)).reduceByKeyLocally(Long::sum);
-
-        PartitioningInfo partitioningInfo = computePartitionDistribution(freqs, partitionCapacity);
-        Map<UUID, PartitionDistribution> distributionMap = partitioningInfo.getDistributionMap();
-
-        System.out.println("Distribution map size "+SizeEstimator.estimate(distributionMap));
-
-        System.out.println("No of partitions " + partitioningInfo.getPartitionNo());
-
-        Broadcast<Map<UUID, PartitionDistribution>> distributionBroadcast = jsc.broadcast(distributionMap);
-
+        CostFunction<byte[]> lengthCostFunction = data -> data.length;
+        CostFunction<UUID> keyFixedCostFunction = data -> 50000;
+        CostBasedPartitioner<UUID, byte[]> customPartitioner2 = new CostBasedPartitioner<>(pairRDD, 8, partitionCapacity, lengthCostFunction, keyFixedCostFunction);
         t1 = System.currentTimeMillis();
-        JavaPairRDD<UUID, byte[]> repartitionedRDD = pairRDD.repartitionAndSortWithinPartitions(new CustomPartitioner(distributionBroadcast, partitioningInfo.getPartitionNo(), reservedPartitions));
+        JavaPairRDD<UUID, byte[]> repartitionedRDD = pairRDD.repartitionAndSortWithinPartitions(customPartitioner2);
 
         repartitionedRDD.count();
 //
@@ -116,3 +104,4 @@ public class CustomPartitionerDemo {
 
 
 }
+

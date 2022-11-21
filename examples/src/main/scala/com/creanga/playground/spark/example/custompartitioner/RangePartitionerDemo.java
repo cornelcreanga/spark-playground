@@ -20,7 +20,6 @@ import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.util.*;
 
-import static com.creanga.playground.spark.util.UUIDUtils.asBytes;
 import static org.apache.curator.shaded.com.google.common.primitives.UnsignedBytes.lexicographicalComparator;
 
 public class RangePartitionerDemo {

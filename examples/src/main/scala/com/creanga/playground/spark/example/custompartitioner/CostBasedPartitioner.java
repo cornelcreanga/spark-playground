@@ -2,43 +2,74 @@ package com.creanga.playground.spark.example.custompartitioner;
 
 import org.apache.commons.math3.util.Pair;
 import org.apache.spark.Partitioner;
-import org.apache.spark.broadcast.Broadcast;
+import org.apache.spark.api.java.JavaPairRDD;
+import scala.Tuple2;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class CustomPartitioner extends Partitioner implements Serializable {
+public class CostBasedPartitioner<K extends Serializable, V> extends Partitioner implements Serializable {
 
-    private final int partitions;
-    private final int reservedPartitions;
-    private final Map<UUID, PartitionDistribution> distribution;
+    private int partitions;
+    private int reservedPartitions;
+    private Map<K, PartitionDistribution> distribution;
 
-    public CustomPartitioner(Broadcast<Map<UUID, PartitionDistribution>> distributionBroadcast, int partitions, int reservedPartitions) {
-        this.distribution = distributionBroadcast.getValue();
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeInt(partitions);
+        out.writeInt(reservedPartitions);
+        out.writeObject(distribution);
+
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        partitions = in.readInt();
+        reservedPartitions = in.readInt();
+        distribution = (Map<K, PartitionDistribution>) in.readObject();
+    }
+
+    public CostBasedPartitioner(Map<K, PartitionDistribution> precomputedDistribution, int partitions, int reservedPartitions) {
+        this.distribution = precomputedDistribution;
         this.partitions = partitions;
         this.reservedPartitions = reservedPartitions;
     }
 
-    public static PartitioningInfo computePartitionDistribution(Map<UUID, Long> keysToCost, long partitionCost) {
+    public CostBasedPartitioner(JavaPairRDD<K, V> pairRDD, int minimumPartitions, long partitionCapacity, CostFunction<V> itemCostFunction, CostFunction<K> keyFixedCostFunction) {
+        Map<K, Long> freqs = new HashMap<>(pairRDD.mapToPair(t -> new Tuple2<>(t._1, itemCostFunction.computeCost(t._2))).reduceByKeyLocally(Long::sum));
+        Set<K> keys = freqs.keySet();
+        for (K key : keys) {
+            Long value = freqs.get(key);
+            freqs.put(key, value + keyFixedCostFunction.computeCost(key));
+        }
+        PartitioningInfo<K> partitioningInfo = computePartitionDistribution(freqs, partitionCapacity, minimumPartitions);
+        this.distribution = partitioningInfo.getDistributionMap();
+        this.partitions = partitioningInfo.getPartitionNo();
+        this.reservedPartitions = 0;
+    }
+
+    public PartitioningInfo<K> computePartitionDistribution(Map<K, Long> keysToCost, long partitionCost, int minPartitions) {
 
         long no = 0;
-        List<UUID> keys = new ArrayList<>(keysToCost.keySet());
+        List<K> keys = new ArrayList<>(keysToCost.keySet());
         List<Long> keyCosts = new ArrayList<>(keysToCost.values());
         double[] keysWeights = new double[keyCosts.size()];
         for (long cost : keyCosts) {
             no += cost;
         }
         //compute how many partitions do we need
-        int partitions = (int) Math.max(no / partitionCost, 1);
+        int partitions = (int) Math.max(no / partitionCost, minPartitions);
+        int partitionCostRecomputed = (int) (no / partitions);
         //compute weigths per item. if weight is more than 1 the items will be located in more than one partition
         for (int i = 0; i < keyCosts.size(); i++) {
-            keysWeights[i] = (double) keyCosts.get(i) / partitionCost;
+            keysWeights[i] = (double) keyCosts.get(i) / partitionCostRecomputed;
         }
 
         double[] partitionAvailabilities = new double[partitions];
         Arrays.fill(partitionAvailabilities, 1);
-        Map<UUID, List<PartitionInfo>> keyPartitionProbabilities = new HashMap<>();
+        Map<K, List<PartitionInfo>> keyPartitionProbabilities = new HashMap<>();
         for (int i = 0; i < keyCosts.size(); i++) {
             double keyPartition = keysWeights[i];
             List<PartitionInfo> list = new ArrayList<>();
@@ -66,10 +97,10 @@ public class CustomPartitioner extends Partitioner implements Serializable {
             }
         }
 
-        Map<UUID, PartitionDistribution> distributionMap = new HashMap<>();
-        Set<UUID> uuids = keyPartitionProbabilities.keySet();
+        Map<K, PartitionDistribution> distributionMap = new HashMap<>();
+        Set<K> uuids = keyPartitionProbabilities.keySet();
 
-        for (UUID uuid : uuids) {
+        for (K uuid : uuids) {
             List<PartitionInfo> list = keyPartitionProbabilities.get(uuid);
             //if we have 1 partition there is no need to build a heavyweight EnumeratedDistribution
             if (list.size() == 1) {
@@ -79,7 +110,7 @@ public class CustomPartitioner extends Partitioner implements Serializable {
                 distributionMap.put(uuid, new PartitionDistribution(pairs));
             }
         }
-        return new PartitioningInfo(partitions, distributionMap);
+        return new PartitioningInfo<>(partitions, distributionMap);
 
     }
 
@@ -90,7 +121,7 @@ public class CustomPartitioner extends Partitioner implements Serializable {
 
     @Override
     public int getPartition(Object partitionKey) {
-        UUID key = (UUID) partitionKey;
+        K key = (K) partitionKey;
         PartitionDistribution partitionDistribution = distribution.get(key);
         if (partitionDistribution != null) {
             return partitionDistribution.getPartition();
@@ -101,4 +132,5 @@ public class CustomPartitioner extends Partitioner implements Serializable {
             return (partitions - reservedPartitions) + key.hashCode() % reservedPartitions;
         }
     }
+
 }

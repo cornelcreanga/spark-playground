@@ -1,12 +1,10 @@
 package com.creanga.playground.spark.example.partitioner;
 
-import com.creanga.playground.spark.example.custompartitioner.CustomPartitionerDemo;
 import com.creanga.playground.spark.util.FastRandom;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.*;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-import org.apache.spark.api.java.function.PairFunction;
 import org.apache.spark.storage.StorageLevel;
 import scala.Tuple2;
 import scala.Tuple3;
@@ -20,9 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.*;
-import java.util.function.BiConsumer;
 
-import static com.creanga.playground.spark.util.UUIDUtils.asBytes;
 
 public class PartitioningExample {
 
@@ -41,7 +37,7 @@ public class PartitioningExample {
         int values = 10_000_000;
 
         List<Tuple3<UUID, Integer, Integer>> stats = new ArrayList<>();
-        try (InputStream in = CustomPartitionerDemo.class.getResourceAsStream("/stats.csv"); //cid, eventNo, eventsTotalsize, eventsTotalsize/eventNo
+        try (InputStream in = PartitioningExample.class.getResourceAsStream("/stats.csv"); //cid, eventNo, eventsTotalsize, eventsTotalsize/eventNo
              BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = reader.readLine()) != null) {
