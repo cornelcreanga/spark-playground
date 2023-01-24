@@ -58,13 +58,13 @@ public class CostPartitionerDemo {
              BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] items = line.split(",");
+                String[] items = line.split(",", -1);
                 UUID cid = UUID.randomUUID();
                 long itemsSize = Long.parseLong(items[1]);
                 long itemsNo = Integer.parseInt(items[2]);
-                if (itemsSize/itemsNo > 10000 ){
-                    System.out.println(cid + " "+ (itemsSize/itemsNo)+" "+itemsSize);
-                }
+//                if (itemsSize/itemsNo > 10000 ){
+//                    System.out.println(cid + " "+ (itemsSize/itemsNo)+" "+itemsSize);
+//                }
                 stats.add(new Tuple3<>(cid, itemsNo, (int)(itemsSize/itemsNo)));
             }
         } catch (Exception e) {

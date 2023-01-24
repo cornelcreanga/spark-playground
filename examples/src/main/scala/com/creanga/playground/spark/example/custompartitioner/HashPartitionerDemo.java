@@ -46,7 +46,7 @@ public class HashPartitionerDemo {
              BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] items = line.split("\t");
+                String[] items = line.split(",", -1);
                 stats.add(new Tuple3<>(UUID.randomUUID(), Long.parseLong(items[0]), Integer.parseInt(items[1])));
             }
         } catch (Exception e) {

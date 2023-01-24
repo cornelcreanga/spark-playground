@@ -13,8 +13,7 @@
     <artifactId>examples</artifactId>
 
     <properties>
-        <maven.compiler.source>1.11</maven.compiler.source>
-
+        <maven.compiler.source>1.17</maven.compiler.source>
     </properties>
 
     <dependencies>
