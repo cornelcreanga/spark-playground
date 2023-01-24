@@ -31,7 +31,7 @@ public class SyntheticRddProvider implements Serializable {
         Arrays.fill(empty, (byte) 1);
     }
 
-    public SyntheticRddProvider(JavaSparkContext jsc, List<Tuple3<UUID, Integer, Integer>> stats, int partitions, int values, Map<String, Object> context) {
+    public SyntheticRddProvider(JavaSparkContext jsc, List<Tuple3<UUID, Long, Integer>> stats, int partitions, int values, Map<String, Object> context) {
         this.jsc = jsc;
         this.partitions = partitions;
         this.values = values;
@@ -39,7 +39,7 @@ public class SyntheticRddProvider implements Serializable {
 
         List<Pair<UUID, Double>> distributionList = new ArrayList<>();
         Map<UUID, Integer> cidToEventSize = new HashMap<>();
-        for (Tuple3<UUID, Integer, Integer> t : stats) {
+        for (Tuple3<UUID, Long, Integer> t : stats) {
             distributionList.add(new Pair<>(t._1(), (double) t._2() * t._3()));
             cidToEventSize.put(t._1(), t._3());
         }

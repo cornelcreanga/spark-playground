@@ -138,7 +138,7 @@ public class TestCompressionWrite {
             con.setRequestMethod("GET");
 
             try (InputStream inputStream = con.getInputStream(); OutputStream targetStream = Files.newOutputStream(Paths.get(localPath))) {
-                inputStream.transferTo(targetStream);
+               // inputStream.transferTo(targetStream);
             }
         }else if (uri.startsWith("s3")){
 

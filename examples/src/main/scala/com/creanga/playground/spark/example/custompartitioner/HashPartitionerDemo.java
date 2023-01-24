@@ -41,13 +41,13 @@ public class HashPartitionerDemo {
         int allocatablePartitions = partitions - reservedPartitions;
         int values = 4 * 1_000_000;
 
-        List<Tuple3<UUID, Integer, Integer>> stats = new ArrayList<>();
+        List<Tuple3<UUID, Long, Integer>> stats = new ArrayList<>();
         try (InputStream in = HashPartitionerDemo.class.getResourceAsStream("/stats.csv"); //cid, eventNo, eventsTotalsize, eventsTotalsize/eventNo
              BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] items = line.split("\t");
-                stats.add(new Tuple3<>(UUID.randomUUID(), Integer.parseInt(items[0]), Integer.parseInt(items[1])));
+                stats.add(new Tuple3<>(UUID.randomUUID(), Long.parseLong(items[0]), Integer.parseInt(items[1])));
             }
         } catch (Exception e) {
             throw new RuntimeException("cannot create the synthetic rdd, an error appeared during parsing the frequency file", e);

@@ -36,14 +36,14 @@ public class PartitioningExample {
         int allocatablePartitions = partitions - reservedPartitions;
         int values = 10_000_000;
 
-        List<Tuple3<UUID, Integer, Integer>> stats = new ArrayList<>();
+        List<Tuple3<UUID, Long, Integer>> stats = new ArrayList<>();
         try (InputStream in = PartitioningExample.class.getResourceAsStream("/stats.csv"); //cid, eventNo, eventsTotalsize, eventsTotalsize/eventNo
              BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = reader.readLine()) != null) {
                 String[] items = line.split("\t");
                 UUID cid = UUID.randomUUID();
-                stats.add(new Tuple3<>(cid, Integer.parseInt(items[0]), Integer.parseInt(items[1])));
+                stats.add(new Tuple3<>(cid, Long.parseLong(items[0]), Integer.parseInt(items[1])));
             }
         } catch (Exception e) {
             throw new RuntimeException("cannot create the synthetic rdd, an error appeared during parsing the frequency file", e);

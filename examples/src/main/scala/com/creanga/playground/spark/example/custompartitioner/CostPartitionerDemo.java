@@ -3,6 +3,7 @@ package com.creanga.playground.spark.example.custompartitioner;
 import com.creanga.playground.spark.example.partitioner.SyntheticRddProvider;
 import org.apache.spark.SparkConf;
 import org.apache.spark.SparkContext;
+import org.apache.spark.TaskContext;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.catalyst.optimizer.Cost;
@@ -52,14 +53,19 @@ public class CostPartitionerDemo {
         int values = 5*1_000_000;
 
 
-        List<Tuple3<UUID, Integer, Integer>> stats = new ArrayList<>();
+        List<Tuple3<UUID, Long, Integer>> stats = new ArrayList<>();
         try (InputStream in = CostPartitionerDemo.class.getResourceAsStream("/stats.csv"); //cid, eventNo, eventsTotalsize, eventsTotalsize/eventNo
              BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] items = line.split("\t");
+                String[] items = line.split(",");
                 UUID cid = UUID.randomUUID();
-                stats.add(new Tuple3<>(cid, Integer.parseInt(items[0]), Integer.parseInt(items[1])));
+                long itemsSize = Long.parseLong(items[1]);
+                long itemsNo = Integer.parseInt(items[2]);
+                if (itemsSize/itemsNo > 10000 ){
+                    System.out.println(cid + " "+ (itemsSize/itemsNo)+" "+itemsSize);
+                }
+                stats.add(new Tuple3<>(cid, itemsNo, (int)(itemsSize/itemsNo)));
             }
         } catch (Exception e) {
             throw new RuntimeException("cannot create the synthetic rdd, an error appeared during parsing the frequency file", e);
@@ -76,6 +82,20 @@ public class CostPartitionerDemo {
         JavaPairRDD<UUID, byte[]> repartitionedRDD = pairRDD.repartitionAndSortWithinPartitions(customPartitioner2);
 
         repartitionedRDD.count();
+
+        Map<Integer, Tuple2<Long,Long>> itemsPerPartition = repartitionedRDD.mapPartitionsToPair(it -> {
+            long l = 0;
+            long s = 0;
+            while(it.hasNext()){
+                l ++;
+                s+=it.next()._2.length;
+            }
+            return  Collections.singletonList(new Tuple2<>(TaskContext.getPartitionId(), new Tuple2<>(l,s))).iterator();
+        }).collectAsMap();
+
+        System.out.println("--------------------------------------");
+        itemsPerPartition.forEach((integer, t) -> System.out.printf("%d %d %d\n", integer, t._1, t._2));
+        System.out.println("--------------------------------------");
 //
 //        Map<Integer, Map<String, Integer>> distribution = repartitionedRDD.mapPartitionsToPair(it -> {
 //            Map<String, Integer> f = new HashMap<>();
