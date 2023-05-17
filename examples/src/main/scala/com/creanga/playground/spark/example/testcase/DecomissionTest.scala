@@ -20,6 +20,7 @@ object DecomissionTest {
           System.err.println(TaskContext.getPartitionId + " If you’re feeling bad, you just look at the cats, you’ll feel better, because they know that everything is, just as it is. There’s nothing to get excited about. They just know. They’re saviours. I'll wait " + taskTime + " ms")
           Thread.sleep(taskTime)
       })
+      Thread.sleep(taskTime + taskTime/2)
     }
   }
 
