@@ -12,10 +12,10 @@
         <logger name="com.creanga" level="WARN" additivity="false">
             <AppenderRef ref="Console"/>
         </logger>
-        <logger name="org.apache.hadoop.fs.s3a" level="DEBUG" additivity="false">
+        <logger name="org.apache.hadoop.fs.s3a" level="WARN" additivity="false">
             <AppenderRef ref="Console"/>
         </logger>
-        <logger name="org.apache.spark" level="DEBUG" additivity="false">
+        <logger name="org.apache.spark" level="WARN" additivity="false">
             <AppenderRef ref="Console"/>
         </logger>
 

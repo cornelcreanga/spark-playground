@@ -1,6 +1,10 @@
 package com.creanga.playground.spark.example.tableformats;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.Calendar;
 
 public class Trip implements Serializable {
 
@@ -16,7 +20,48 @@ public class Trip implements Serializable {
     private long endTimestamp;
     private byte paymentType;
 
+    private int orderYear;
+    private int orderMonth;
+    private int orderDay;
+
     public Trip() {
+    }
+
+    private void setFields(){
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(orderTimestamp);
+        orderYear = cal.get(Calendar.YEAR);
+        orderMonth = cal.get(Calendar.MONTH);
+        orderDay = cal.get(Calendar.DAY_OF_MONTH);
+    }
+
+    private void readObject(ObjectInputStream in) throws ClassNotFoundException, IOException {
+        tripId = in.readUTF();
+        userId = in.readUTF();
+        driverId = in.readUTF();
+        startLatitude = in.readDouble();
+        startLongitude = in.readDouble();
+        endLatitude = in.readDouble();
+        endLongitude = in.readDouble();
+        orderTimestamp = in.readLong();
+        startTimestamp = in.readLong();
+        endTimestamp = in.readLong();
+        paymentType = in.readByte();
+        setFields();
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        out.writeUTF(tripId);
+        out.writeUTF(userId);
+        out.writeUTF(driverId);
+        out.writeDouble(startLatitude);
+        out.writeDouble(startLongitude);
+        out.writeDouble(endLatitude);
+        out.writeDouble(endLongitude);
+        out.writeLong(orderTimestamp);
+        out.writeLong(startTimestamp);
+        out.writeLong(endTimestamp);
+        out.writeByte(paymentType);
     }
 
     public Trip(String tripId, String userId, String driverId, double startLatitude, double startLongitude, double endLatitude, double endLongitude, long orderTimestamp, long startTimestamp, long endTimestamp, byte paymentType) {
@@ -31,6 +76,7 @@ public class Trip implements Serializable {
         this.startTimestamp = startTimestamp;
         this.endTimestamp = endTimestamp;
         this.paymentType = paymentType;
+        setFields();
     }
 
     public String getTripId() {
@@ -115,6 +161,30 @@ public class Trip implements Serializable {
 
     public byte getPaymentType() {
         return paymentType;
+    }
+
+    public int getOrderYear() {
+        return orderYear;
+    }
+
+    public int getOrderMonth() {
+        return orderMonth;
+    }
+
+    public int getOrderDay() {
+        return orderDay;
+    }
+
+    public void setOrderYear(int orderYear) {
+        this.orderYear = orderYear;
+    }
+
+    public void setOrderMonth(int orderMonth) {
+        this.orderMonth = orderMonth;
+    }
+
+    public void setOrderDay(int orderDay) {
+        this.orderDay = orderDay;
     }
 
     public void setPaymentType(byte paymentType) {
