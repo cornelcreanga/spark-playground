@@ -20,6 +20,24 @@
     <dependencies>
 
         <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-core -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-core</artifactId>
+            <version>1.12.580</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-core -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>1.12.580</version>
+        </dependency>
+
+        <dependency>
             <groupId>net.andreinc</groupId>
             <artifactId>mockneat</artifactId>
         </dependency>
@@ -191,12 +209,12 @@
                 <dependency>
                     <groupId>org.apache.spark</groupId>
                     <artifactId>spark-core_${scala.compat.version}</artifactId>
-                    <scope>provided</scope>
+<!--                    <scope>provided</scope>-->
                 </dependency>
                 <dependency>
                     <groupId>org.apache.spark</groupId>
                     <artifactId>spark-sql_${scala.compat.version}</artifactId>
-                    <scope>provided</scope>
+<!--                    <scope>provided</scope>-->
                 </dependency>
             </dependencies>
         </profile>

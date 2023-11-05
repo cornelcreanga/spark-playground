@@ -2,11 +2,12 @@
 <Configuration>
     <Appenders>
         <Console name="Console">
-            <PatternLayout pattern="%d{yy/MM/dd HH:mm:ss} %p %c{1}: %m%n"/>
+            <PatternLayout pattern="%d{yy/MM/dd HH:mm:ss} %p %c{1}: %-0.-500m %throwable{3} %n "/>
+
         </Console>
     </Appenders>
     <Loggers>
-        <Root level="ERROR">
+        <Root level="WARN">
             <AppenderRef ref="Console"/>
         </Root>
         <logger name="com.creanga" level="WARN" additivity="false">
@@ -14,3 +15,5 @@
         </logger>
     </Loggers>
 </Configuration>
+
+
