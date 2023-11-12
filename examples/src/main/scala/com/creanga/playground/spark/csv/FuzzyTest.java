@@ -12,6 +12,12 @@ public class FuzzyTest {
         System.out.println(FuzzySearch.tokenSetPartialRatio("3E Staging Ic.","3E Staging Inc. - Home Staging, Design and Renovation Services"));
         System.out.println(FuzzySearch.weightedRatio("3E Staging Inc.","3E Staging Inc. - Home Staging, Design and Renovation Services"));
         System.out.println(FuzzySearch.weightedRatio("3E STAGING INC.","3E Staging Inc. - Home Staging, Design and Renovation Services"));
+
+        System.out.println(FuzzySearch.weightedRatio("1CS - Computer Services","1ComputerServices Inc. (1CS)"));
+        System.out.println(FuzzySearch.tokenSetRatio("1CS - Computer Services","1ComputerServices Inc. (1CS)"));
+        System.out.println(FuzzySearch.tokenSetPartialRatio("1CS - Computer Services","1ComputerServices Inc. (1CS)"));
+        System.out.println(FuzzySearch.weightedRatio("1CS - Computer Services","1ComputerServices Inc. (1CS)"));
+        System.out.println(FuzzySearch.weightedRatio("1CS - Computer Services","1ComputerServices Inc. (1CS)"));
 /**
  * |Rise Respite Resource Solutions Inc.                                                                                                                                                                                                                                                                   |google|
  * |3rsolutions4u.ca                      |6535 millcreek drive, l5n2m2, mississauga, on, canada, ontario                                                                      |Security Guards & Patrol Services|Community Center                                                                                        |mississauga                  |canada                                 |ontario                       |+19059979222   |RISE Respite Solutions                                                                                                                                                                                                                                                                                 |fb    |
