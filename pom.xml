@@ -40,6 +40,14 @@
     <dependencyManagement>
     <dependencies>
 
+        <!-- https://mvnrepository.com/artifact/com.mammb/jpostal -->
+        <dependency>
+            <groupId>com.mammb</groupId>
+            <artifactId>jpostal</artifactId>
+            <version>0.5.0</version>
+        </dependency>
+
+
         <dependency>
             <groupId>net.andreinc</groupId>
             <artifactId>mockneat</artifactId>
