@@ -13,16 +13,11 @@
     <artifactId>examples</artifactId>
 
     <properties>
-        <maven.compiler.source>1.17</maven.compiler.source>
-        <maven.compiler.target>1.17</maven.compiler.target>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
     </properties>
 
     <dependencies>
-
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>s3</artifactId>
-        </dependency>
 
         <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-core -->
         <dependency>
@@ -106,24 +101,6 @@
             <version>1.5.2-1</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.iceberg</groupId>
-            <artifactId>iceberg-spark-runtime-3.3_${scala.compat.version}</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-aws</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>s3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>sts</artifactId>
-        </dependency>
 
     </dependencies>
 
