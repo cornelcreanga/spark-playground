@@ -39,15 +39,15 @@ object SparkMeasureSingleThreaded {
       save("/tmp/temp/")
 
     stageMetrics.end()
-    var map = stageMetrics.reportMap()
-    println(map.get("recordsWritten"))
+    var map = stageMetrics.report()
+    //println(map.get("recordsWritten"))
     //stageMetrics.printReport()
 
     stageMetrics.begin()
     val df2 = spark.read.json("/tmp/temp")
     stageMetrics.end()
-    map = stageMetrics.reportMap()
-    println(map.get("recordsRead"))
+    map = stageMetrics.report()
+    //println(map.get("recordsRead"))
 
 
     Thread.sleep(100000)

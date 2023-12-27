@@ -31,6 +31,13 @@ public class CostBasedPartitioner<K extends Serializable, V> extends Partitioner
         distribution = (Map<K, PartitionDistribution>) in.readObject();
     }
 
+    public CostBasedPartitioner(Map<K, Long> freqs, int minimumPartitions, long partitionCapacity) {
+        PartitioningInfo<K> partitioningInfo = computePartitionDistribution(freqs, partitionCapacity, minimumPartitions);
+        this.distribution = partitioningInfo.getDistributionMap();
+        this.partitions = partitioningInfo.getPartitionNo();
+        this.reservedPartitions = 0;
+    }
+
     public CostBasedPartitioner(Map<K, PartitionDistribution> precomputedDistribution, int partitions, int reservedPartitions) {
         this.distribution = precomputedDistribution;
         this.partitions = partitions;
@@ -57,17 +64,23 @@ public class CostBasedPartitioner<K extends Serializable, V> extends Partitioner
         List<Long> keyCosts = new ArrayList<>(keysToCost.values());
         double[] keysWeights = new double[keyCosts.size()];
         for (long cost : keyCosts) {
+            if (no > (Long.MAX_VALUE - cost)){
+                throw new RuntimeException("total cost exceeds Long.MAX_VALUE. Use smaller numbers");
+            }
             no += cost;
         }
         //compute how many partitions do we need
-        int partitions = (int) Math.max(no / partitionCost, minPartitions);
+        long partitions = Math.max(no / partitionCost, minPartitions);
+        if (partitions > 100000){
+            throw new RuntimeException("too many partitions:"+partitions);
+        }
         int partitionCostRecomputed = (int) (no / partitions);
         //compute weigths per item. if weight is more than 1 the items will be located in more than one partition
         for (int i = 0; i < keyCosts.size(); i++) {
             keysWeights[i] = (double) keyCosts.get(i) / partitionCostRecomputed;
         }
 
-        double[] partitionAvailabilities = new double[partitions];
+        double[] partitionAvailabilities = new double[(int)partitions];
         Arrays.fill(partitionAvailabilities, 1);
         Map<K, List<PartitionInfo>> keyPartitionProbabilities = new HashMap<>();
         for (int i = 0; i < keyCosts.size(); i++) {
@@ -110,7 +123,7 @@ public class CostBasedPartitioner<K extends Serializable, V> extends Partitioner
                 distributionMap.put(uuid, new PartitionDistribution(pairs));
             }
         }
-        return new PartitioningInfo<>(partitions, distributionMap);
+        return new PartitioningInfo<>((int)partitions, distributionMap);
 
     }
 
@@ -133,4 +146,44 @@ public class CostBasedPartitioner<K extends Serializable, V> extends Partitioner
         }
     }
 
+    public Map<K, PartitionDistribution> getDistribution() {
+        return Collections.unmodifiableMap(distribution);
+    }
+
+    public static void main(String[] args) {
+        Map<String, Long> freqs = new HashMap<>();
+        String[] c = new String[]{"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "a", "b", "c", "d", "e", "f"};
+        String[] e = new String[26];
+        for (int i = 0; i < e.length; i++) {
+            e[i] = "" + (char)('a' + i);
+        }
+        for (int i = 0; i < c.length; i++) {
+            for (int j = 0; j < e.length; j++) {
+                String key = c[i]+"_"+e[j];
+                freqs.put(key, (long)(500_000 + Math.random()*1_000_000));
+            }
+        }
+        for (int i = 0; i < c.length; i++) {
+            freqs.put(c[i]+"_a", (long)(5_000_000 + Math.random()*10_000_000));
+            freqs.put(c[i]+"_b", (long)(2_000_000 + Math.random()*2_000_000));
+        }
+
+        CostBasedPartitioner<String, byte[]> costBasedPartitioner = new CostBasedPartitioner<>(freqs,8,500000);
+        Map<String, PartitionDistribution> distributionMap = costBasedPartitioner.getDistribution();
+        Set<String> k = distributionMap.keySet();
+        for (Iterator iterator = k.iterator(); iterator.hasNext(); ) {
+            String next = (java.lang.String) iterator.next();
+            System.out.println(next + " : "+ distributionMap.get(next).getEnumeratedDistribution().getPmf().size());
+        }
+        //costBasedPartitioner.getDistribution();
+        for (int i = 0; i < c.length; i++) {
+            for (int j = 0; j < e.length; j++) {
+                String key = c[i]+"_"+e[j];
+                int partition = costBasedPartitioner.getPartition(key);
+                System.out.println(key+":"+partition);
+            }
+        }
+        System.out.println("done");
+
+    }
 }

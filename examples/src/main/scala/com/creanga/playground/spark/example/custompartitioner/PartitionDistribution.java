@@ -52,4 +52,7 @@ public class PartitionDistribution implements Serializable {
         }
     }
 
+    public EnumeratedDistribution<Integer> getEnumeratedDistribution() {
+        return enumeratedDistribution;
+    }
 }

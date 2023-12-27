@@ -46,7 +46,7 @@ object SparkMeasureMultiThreadedJobs {
     stageMetrics.listenerStage
     println("done")
     val df = stageMetrics.createStageMetricsDF()
-    stageMetrics.reportMap()
+    stageMetrics.report();
     df.printSchema();
     df.show(100)
 

@@ -20,11 +20,6 @@
     <dependencies>
 
         <dependency>
-            <groupId>net.andreinc</groupId>
-            <artifactId>mockneat</artifactId>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/me.xdrop/fuzzywuzzy -->
-        <dependency>
             <groupId>me.xdrop</groupId>
             <artifactId>fuzzywuzzy</artifactId>
             <version>1.4.0</version>
@@ -90,8 +85,9 @@
 
         <dependency>
             <groupId>org.apache.iceberg</groupId>
-            <artifactId>iceberg-spark-runtime-3.3_${scala.compat.version}</artifactId>
+            <artifactId>iceberg-spark-runtime-3.4_${scala.compat.version}</artifactId>
         </dependency>
+
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>
