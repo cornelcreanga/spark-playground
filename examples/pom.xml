@@ -19,6 +19,37 @@
 
     <dependencies>
 
+
+        <!-- https://mvnrepository.com/artifact/org.apache.spark/spark-mllib -->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-mllib_2.12</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>1.7</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-core -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-core</artifactId>
+            <version>1.12.580</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-core -->
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk-s3</artifactId>
+            <version>1.12.580</version>
+        </dependency>
+
+        <dependency>
+            <groupId>net.andreinc</groupId>
+            <artifactId>mockneat</artifactId>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/me.xdrop/fuzzywuzzy -->
         <dependency>
             <groupId>me.xdrop</groupId>
             <artifactId>fuzzywuzzy</artifactId>
@@ -206,12 +237,12 @@
                 <dependency>
                     <groupId>org.apache.spark</groupId>
                     <artifactId>spark-core_${scala.compat.version}</artifactId>
-                    <scope>provided</scope>
+<!--                    <scope>provided</scope>-->
                 </dependency>
                 <dependency>
                     <groupId>org.apache.spark</groupId>
                     <artifactId>spark-sql_${scala.compat.version}</artifactId>
-                    <scope>provided</scope>
+<!--                    <scope>provided</scope>-->
                 </dependency>
             </dependencies>
         </profile>

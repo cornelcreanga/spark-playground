@@ -2,14 +2,15 @@
 <Configuration>
     <Appenders>
         <Console name="Console">
-            <PatternLayout pattern="%d{yy/MM/dd HH:mm:ss} %p %c{1}: %m%n"/>
+            <PatternLayout pattern="%d{yy/MM/dd HH:mm:ss} %p %c{1}: %-0.-500m %throwable{3} %n "/>
+
         </Console>
     </Appenders>
     <Loggers>
         <Root level="DEBUG">
             <AppenderRef ref="Console"/>
         </Root>
-        <logger name="com.creanga" level="WARN" additivity="false">
+        <logger name="com.creanga" level="INFO" additivity="false">
             <AppenderRef ref="Console"/>
         </logger>
         <logger name="org.apache.hadoop.fs.s3a" level="WARN" additivity="false">
@@ -23,3 +24,5 @@
 
     </Loggers>
 </Configuration>
+
+
