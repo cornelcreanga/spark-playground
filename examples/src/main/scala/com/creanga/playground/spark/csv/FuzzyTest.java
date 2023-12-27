@@ -1,10 +1,19 @@
 package com.creanga.playground.spark.csv;
 
 import me.xdrop.fuzzywuzzy.FuzzySearch;
+import org.apache.commons.validator.routines.DomainValidator;
+import org.apache.commons.validator.routines.UrlValidator;
 
 public class FuzzyTest {
 
     public static void main(String[] args) {
+
+//        System.out.println(new UrlValidator().isValid("evz.ro"));
+        System.out.println(DomainValidator.getInstance().isValid("sdf.evz.ro"));
+        System.out.println(DomainValidator.getInstance().isValid("evz"));
+        System.out.println(DomainValidator.getInstance().isValid("evz evz.ro"));
+        System.out.println(DomainValidator.getInstance().isValid(""));
+
 //        System.out.println(FuzzySearch.tokenSetRatio("fuzzy was a bear", "fuzzy fuzzy fuzzy bear"));
 //        System.out.println(FuzzySearch.tokenSetPartialRatio("fuzzy was a bear", "fuzzy fuzzy fuzzy bear"));
         System.out.println(FuzzySearch.weightedRatio("3E Staging Inc.","3E Staging Inc. - Home Staging, Design and Renovation Services"));

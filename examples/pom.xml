@@ -20,6 +20,18 @@
     <dependencies>
 
 
+        <!-- https://mvnrepository.com/artifact/org.apache.spark/spark-mllib -->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-mllib_2.12</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-validator</groupId>
+            <artifactId>commons-validator</artifactId>
+            <version>1.7</version>
+        </dependency>
         <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-core -->
         <dependency>
             <groupId>com.amazonaws</groupId>

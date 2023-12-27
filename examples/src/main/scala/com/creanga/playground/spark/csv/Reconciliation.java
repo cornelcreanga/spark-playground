@@ -1,5 +1,9 @@
 package com.creanga.playground.spark.csv;
 
+import com.creanga.playground.spark.example.logging.LoggingTest;
+import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.api.java.function.ReduceFunction;
 import org.apache.spark.sql.*;
@@ -7,6 +11,7 @@ import org.apache.spark.sql.catalyst.encoders.ExpressionEncoder;
 import org.apache.spark.sql.catalyst.encoders.RowEncoder;
 import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructType;
+import scala.Function1;
 import scala.reflect.ClassTag;
 
 import java.util.HashMap;
@@ -16,6 +21,8 @@ import java.util.Set;
 
 //https://soleadify.notion.site/Assignment-Big-Data-Engineer-df0764120fa141f3bbeff2ab2620fce6
 public class Reconciliation {
+
+    private static final Logger LOG = LogManager.getLogger(Reconciliation.class);
 
     public static Set<String> knownNames = new HashSet<>();
     public static Map<String, Integer> votingPower = new HashMap<>();
@@ -29,21 +36,25 @@ public class Reconciliation {
         Dataset<Row> fb = sparkSession.read().
                 format("csv").
                 option("header", "true").
-                load("/Users/ccreanga/datasets/facebook_dataset.csv");
+                load("/home/cornel/datasets/facebook_dataset.csv");
         Dataset<Row> google = sparkSession.read().
                 format("csv").
                 option("header", "true").
-                load("/Users/ccreanga/datasets/google_dataset.csv");
+                load("/home/cornel/datasets/google_dataset.csv");
         Dataset<Row> web = sparkSession.read().
                 format("csv").
                 option("header", "true").
                 option("delimiter", ";").
-                load("/Users/ccreanga/datasets/website_dataset.csv");
+                load("/home/cornel/datasets/website_dataset.csv");
 
 
         fb.persist();
         google.persist();
         web.persist();
+
+        LOG.info("FB length "+fb.count());
+        LOG.info("Google length "+google.count());
+        LOG.info("Web" + web.count());
 
         Dataset<Row> siteFb = fb.select("domain").distinct();
         Dataset<Row> siteGoogle = google.select("domain").distinct();
@@ -129,6 +140,8 @@ public class Reconciliation {
         webFiltered.show(10, false);
 
         Dataset<Row> union = fb.union(google).union(web);
+
+
 
         Dataset<Row> unionDomain = google.filter(google.col("domain").equalTo("facebook.com"));
         unionDomain.groupBy("name").count().orderBy(functions.col("count").desc(),functions.col("name").asc()).show(200, false);

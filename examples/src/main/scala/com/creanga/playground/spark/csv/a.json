@@ -1,0 +1,189 @@
+
+{
+  "pagination": {
+    "next": "15310baad1aa959caa0235b3b3ad3d"
+  },
+  "count": 7854,
+  "result": [
+    {
+      "soleadify_id": "d2760abd-93e4-11eb-b89f-536884b3e7dd",
+      "product": {
+        "headline": "The Invensun Sundragon Solar Module",
+        "content": "All Invensun Sundragon solar panels use the highest quality grade A solar cells resulting in greater power generation and extended module life. Silicon Nitride coating is used to further enhance cell efficiency and ensure uniform output.",
+        "url": "https://invensun.com/solar-panels/invensun-sundragon-solar-module",
+        "match_snippets": [
+          "Solar Modules 5W Solar Panel 10W Solar Panel"
+        ]
+      },
+      "company_supplier_types": [
+        "manufacturer"
+      ],
+      "company_name": "Invensun",
+      "company_legal_names": [
+        "Invensun Environmental Corporation"
+      ],
+      "company_commercial_names": [
+        "Invensun"
+      ],
+      "main_country_code": "CA",
+      "main_country": "Canada",
+      "main_region": "Alberta",
+      "main_city": "Calgary",
+      "main_street": "Elbow Drive SW",
+      "main_street_number": null,
+      "main_postcode": "T2V 1K2",
+      "main_latitude": null,
+      "main_longitude": null,
+      "locations": [
+        {
+          "country_code": "CA",
+          "country": "Canada",
+          "region": "Alberta",
+          "city": "Calgary",
+          "postcode": "T2V 1K2",
+          "street": "Elbow Drive SW",
+          "street_number": null,
+          "latitude": null,
+          "longitude": null
+        }
+      ],
+      "num_locations": 1,
+      "company_type": "Private",
+      "year_founded": null,
+      "employee_count": 5,
+      "estimated_revenue": 8500000,
+      "short_description": "For international markets, Invensun solar panels are available directly from Invensun or through knowledge-based regional partners.",
+      "long_description": "MORE THAN WORLD-CLASS SOLAR PANELS\nInvensun, based in Calgary Canada, is a premier designer and manufacturer of world-class solar panels used in diverse applications in all environments. Our flagship, the Sundragon Hazardous Grade Solar Panel is specifically built to operate in classified hazardous locations. More than solar panels, we have the expertise to also offer EPC services. Â A GREAT PARTNERStandards-based quality: Our certified solar panels are manufactured in an ISO 9001 certified facility with a production capability of 150 MW per year, thus ensuring a consistent supply of Sundragon Solar Panels. Knowledge-based worldwide distribution: Invensun solar panels are available in Canada, exclusively through our knowledge-based distribution partner with 18 branches and 2 distribution centres across Canada. For international markets, Invensun solar panels are available directly from Invensun or through knowledge-based regional partners. Driven to add-value: At Invensun, People and their Success and building long lasting relationships are important to us. Therefore, we are driven to help our partners by leveraging our strong and established relationships to offer EPC (engineering, procurement & construction) services, project financing and balance of system components such as racking, inverters and batteries. In short, we add value to everything we do.",
+      "business_tags": [
+        "Photovoltaic",
+        "Residential Solar",
+        "Home Solar",
+        "Solar Powered",
+        "Fossil Fuels",
+        "Construction Services",
+        "Hazardous Location",
+        "Epc Services"
+      ],
+      "main_business_category": "Solar Energy Company",
+      "main_industry": "Solar Energy Company",
+      "main_sector": "Manufacturing",
+      "primary_phone": "+14034527886",
+      "phone_numbers": [
+        "+14034527886",
+        "+18884517886"
+      ],
+      "primary_email": "careers@invensun.com",
+      "emails": null,
+      "other_emails": null,
+      "website_url": "https://invensun.com/",
+      "website_domain": "invensun.com",
+      "website_tld": "com",
+      "website_language_code": "en",
+      "facebook_url": "https://www.facebook.com/invensun/",
+      "twitter_url": "https://twitter.com/invensun",
+      "instagram_url": null,
+      "linkedin_url": "https://www.linkedin.com/company/invensun",
+      "ios_app_url": null,
+      "android_app_url": null,
+      "youtube_url": null,
+      "cms": "joomla",
+      "alexa_rank": null,
+      "technologies": [
+        "paas: siteground",
+        "ui frameworks: bootstrap",
+        "web frameworks: bootstrap",
+        "reverse proxy: nginx",
+        "miscellaneous: k2",
+        "javascript frameworks: jquery migrate",
+        "seo tool: facebook friendly",
+        "tag managers: google tag manager",
+        "javascript libraries: jquery",
+        "hosting: siteground",
+        "seo tool: twitter friendly",
+        "web servers: nginx",
+        "programming languages: php",
+        "javascript libraries: jquery migrate",
+        "cms: joomla",
+        "javascript frameworks: jquery",
+        "analytics: google analytics"
+      ],
+      "naics_2022": {
+        "primary": {
+          "code": "221114",
+          "label": "Solar Electric Power Generation"
+        },
+        "secondary": [
+          {
+            "code": "238210",
+            "label": "Electrical Contractors and Other Wiring Installation Contractors"
+          }
+        ]
+      },
+      "nace_rev2": [
+        {
+          "code": "35.11",
+          "label": "Production of electricity"
+        }
+      ],
+      "ncci_codes_28_1": [
+        "7539"
+      ],
+      "sic": [
+        {
+          "code": "4931",
+          "label": "Electric and Other Services Combined (other electric power generation)"
+        },
+        {
+          "code": "4939",
+          "label": "Electric Services (other electric power generation)"
+        },
+        {
+          "code": "4911",
+          "label": "Combination Utilities, NEC (other electric power generation)"
+        }
+      ],
+      "isic_v4": [
+        {
+          "code": "3510",
+          "label": "Electric power generation, transmission and distribution"
+        }
+      ],
+      "sics_industry": {
+        "code": "RR-ST",
+        "label": "Solar Technology & Project Developers"
+      },
+      "sics_subsector": {
+        "code": "RR.1",
+        "label": "Alternative Energy"
+      },
+      "sics_sector": {
+        "code": "RR",
+        "label": "Renewable Resources & Alternative Energy"
+      },
+      "ibc_insurance": [
+        {
+          "code": "171901",
+          "label": "Solar Energy Contractors (Sales / Service / Installation Only)"
+        },
+        {
+          "code": "509201",
+          "label": "Wholesale - Hardware / Plumbing Supplies / Electrical Supplies"
+        },
+        {
+          "code": "173601",
+          "label": "Electrical Contractors - Industrial"
+        },
+        {
+          "code": "173102",
+          "label": "Electrical Contractors - Commercial (No Industrial)"
+        },
+        {
+          "code": "173101",
+          "label": "Electrical Contractors - Residential"
+        }
+      ],
+      "created_at": "2019-11-23T22:08:36.000Z",
+      "last_updated_at": "2022-11-08T00:13:35.894Z"
+    }
+  ]
+}
