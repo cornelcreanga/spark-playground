@@ -45,10 +45,6 @@
             <version>1.12.580</version>
         </dependency>
 
-        <dependency>
-            <groupId>net.andreinc</groupId>
-            <artifactId>mockneat</artifactId>
-        </dependency>
         <!-- https://mvnrepository.com/artifact/me.xdrop/fuzzywuzzy -->
         <dependency>
             <groupId>me.xdrop</groupId>
@@ -120,19 +116,14 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>org.apache.hadoop</groupId>
-            <artifactId>hadoop-aws</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>s3</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>software.amazon.awssdk</groupId>
-            <artifactId>sts</artifactId>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>software.amazon.awssdk</groupId>-->
+<!--            <artifactId>s3</artifactId>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>software.amazon.awssdk</groupId>-->
+<!--            <artifactId>sts</artifactId>-->
+<!--        </dependency>-->
 
     </dependencies>
 

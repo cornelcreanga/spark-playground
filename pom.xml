@@ -56,13 +56,6 @@
             <version>0.5.0</version>
         </dependency>
 
-
-        <dependency>
-            <groupId>net.andreinc</groupId>
-            <artifactId>mockneat</artifactId>
-            <version>${mockneat.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>org.apache.kafka</groupId>
             <artifactId>kafka-clients</artifactId>
