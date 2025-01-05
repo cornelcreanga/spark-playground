@@ -357,7 +357,8 @@ public class Ml {
                 .add("country", StringType)
                 .add("region", StringType)
                 .add("phone", StringType);
-        ExpressionEncoder rw = RowEncoder.apply(schema);
+
+        Encoder rw = RowEncoder.encoderFor(schema);
 
         return first.map((MapFunction<Row, Row>) value -> {
 
